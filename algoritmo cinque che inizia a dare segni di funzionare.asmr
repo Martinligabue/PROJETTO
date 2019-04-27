@@ -25,7 +25,6 @@ conta:
 	j conta
 
 spaziocarattere:
-	
 	li $t8, ' '
 	sb $t8, ($s2)
 	addi $s2,$s2,1
