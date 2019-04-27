@@ -14,7 +14,7 @@ stampastringaoriginale:
 inizio:
 	la $s0,testo	#impostiamo le variabili $s0, e $s2 rispettivamente a testo e spazio
 	la $s2,spazio
-	move $t0, $s0
+	move $t0, $s0	#creiamo una variable con lo stesso valore di -testo-
 	li $s1, -1
 	
 conta:
@@ -32,7 +32,7 @@ spaziocarattere:
 	j lettura
 
 prelettura:		
-	li $t1,0 		#si resettano $t0 e $t1, così che il ciclo di conta non interferisca
+	li $t1,0 		#si resettano $t0 e $t1, cosÃ¬ che il ciclo di conta non interferisca
 	move $t0, $s0
 	
 lettura:
@@ -56,10 +56,10 @@ controllosx:
 	j controllosx
 	
 salvalettera:
-	li $t3,0 		#$t3 diventa una variabile numerica uguale a 0 (non e' più un indirizzo)
+	li $t3,0 		#$t3 diventa una variabile numerica uguale a 0 (non e' piÃ¹ un indirizzo)
 	sb $t1, ($s2) 		#si carica la lettera non doppia nello space
 	addi $s2,$s2,1		#si aumenta lo space per passare alla prossima posizione
-	move $t5,$s1 		#$t5 diventa il contatore che verrà utilizzato in controllo a dx per non modificare $s1 e poterlo riutilizzare
+	move $t5,$s1 		#$t5 diventa il contatore che verrÃ  utilizzato in controllo a dx per non modificare $s1 e poterlo riutilizzare
 	
 controllodx:
 	bge $t5,$s3, spaziocarattere	
