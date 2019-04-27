@@ -1,5 +1,5 @@
 .data
-	testo: .asciiz "franco"
+	testo: .asciiz "esempio di messaggio criptato"
 	spazio: .space 256
 .text
 stampastringaoriginale:
@@ -31,7 +31,7 @@ spaziocarattere:
 	j lettura
 
 prelettura:		
-	li $t1,0 		#si resettano $t0 e $t1, così che il ciclo di conta non interferisca
+	li $t1,0 		#si resettano $t0 e $t1, cosi' che il ciclo di conta non interferisca
 	move $t0, $s0
 	
 lettura:
@@ -40,7 +40,7 @@ lettura:
 	move $s4,$t0 		#in $s4 mettiamo l'indirizzo della lettera che analizzeremo per poi utilizzarlo in "controllodx"
 	addi $t0,$t0,1 		#contatore dell'indirizzo della lettera
 	addi $s1,$s1,1 		#contatore della lettera che leggiamo
-	li $t2, 0	 	#contatore che parte da 0 per il controllo a sx
+	li $t2, 0	 	#contatore che parte da 0 per il controllo a sx #####si potrebbe togliere
 	move $t3, $s0 		#si resetta sempre al primo indirizzo del testo
 	
 	j controllosx
@@ -55,19 +55,21 @@ controllosx:
 	j controllosx
 	
 salvalettera:
-	li $t3,0 		#$t3 diventa una variabile numerica uguale a 0 (non e' più un indirizzo)
+	li $t3,0 		#$t3 diventa una variabile numerica uguale a 0 (non e' piu' un indirizzo)
 	sb $t1, ($s2) 		#si carica la lettera non doppia nello space
 	addi $s2,$s2,1		#si aumenta lo space per passare alla prossima posizione
-	move $t5,$s1 		#$t5 diventa il contatore che verrà utilizzato in controllo a dx per non modificare $s1 e poterlo riutilizzare
+	move $t5,$s1 		#$t5 diventa il contatore che verra'� utilizzato in controllo a dx per non modificare $s1 e poterlo riutilizzare
+	addi $s3,$s3,1
 	
 controllodx:
-	bge $t5,$s3, spaziocarattere	
+	bge $t5,$s3, spaziocarattere
 	lb $t4,($s4) 		#in $t4 carichiamo la lettera da confrontare
 	move $s6,$t5		#$s6 diventa il valore numerico di $t5 e lo utilizzeremo in "ciclonumero"
-	beq $t1,$t4, scriviposizione #se lettera non doppia e' uguale a quella che scorre a destra salva la posizione
+
 	addi $s4,$s4,1		#si sposta di 1 l'indirizzo della lettera a destra da confrontare
 	addi $t5,$t5,1		#contatore per controllo a destra
-	
+	beq $t1,$t4, scriviposizione #se lettera non doppia e' uguale a quella che scorre a destra salva la posizione
+
 	j controllodx
 	
 scriviposizione:
