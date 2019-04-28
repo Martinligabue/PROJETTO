@@ -12,16 +12,16 @@ stampastringaoriginale:
 	syscall
 
 inizio:
-	la $s0,testo	#impostiamo le variabili $s0, e $s2 rispettivamente a testo e spazio
+	la $s0,testo		#impostiamo le variabili $s0, e $s2 rispettivamente a testo e spazio
 	la $s2,spazio
-	move $t0, $s0	#creiamo una variable con lo stesso valore di -testo-
+	move $t0, $s0		#creiamo una variable con lo stesso valore di -testo-
 	li $s1, -1
 	
 conta:
 	lb $t1,($t0)
 	beqz $t1,prelettura
 	addi $t0,$t0,1
-	addi $s3,$s3,1 	#in $s3 alla fine avremo la lunghezza del testo(in termini numerici)
+	addi $s3,$s3,1 		#in $s3 alla fine avremo la lunghezza del testo(in termini numerici)
 	j conta
 
 spaziocarattere:
@@ -58,7 +58,7 @@ salvalettera:
 	li $t3,0 		#$t3 diventa una variabile numerica uguale a 0 (non e' piu' un indirizzo)
 	sb $t1, ($s2) 		#si carica la lettera non doppia nello space
 	addi $s2,$s2,1		#si aumenta lo space per passare alla prossima posizione
-	move $t5,$s1 		#$t5 diventa il contatore che verra'  utilizzato in controllo a dx per non modificare $s1 e poterlo riutilizzare
+	move $t5,$s1 		#$t5 diventa il contatore che verra'Â  utilizzato in controllo a dx per non modificare $s1 e poterlo riutilizzare
 	addi $s3,$s3,1
 	
 controllodx:
@@ -79,14 +79,14 @@ scriviposizione:
 	j ciclonumero
 	
 ciclonumero:
-	subi $sp,$sp, 4 #apre uno stack
+	subi $sp,$sp, 4 	#apre uno stack
 	addi $t9,$t9,1
 	li $s5,10
 	div $s6, $s5
 	mfhi $t6
 	mflo $s6
 	sb $t6,0($sp)
-	beq $s6,0,caricaNumero #qui c'e' un errore, se e' 0 carica due volte lo 0
+	beq $s6,0,caricaNumero 	#qui c'e' un errore, se e' 0 carica due volte lo 0
 	j ciclonumero
 
 caricaNumero:
@@ -94,10 +94,10 @@ caricaNumero:
 	lw $t3,0($sp)
 	addi $sp,$sp,4
 	addi $t3,$t3,48
-	sb $t3,($s2) #inserisce il valore preso dallo stack come carattere in space
+	sb $t3,($s2) 		#inserisce il valore preso dallo stack come carattere in space
 	addi $s2,$s2,1
 	beqz $t9,caricaNumero
-	addi $t5,$t5,1####
+	addi $t5,$t5,1		####
 	j controllodx
 
 uscita:
