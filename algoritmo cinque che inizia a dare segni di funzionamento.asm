@@ -1,5 +1,5 @@
 .data
-	testo: .asciiz "un testo piu' lung"
+	testo: .asciiz "aaaaaaba"
 	spazio: .space 256
 .text
 stampastringaoriginale:
