@@ -1,5 +1,5 @@
 .data
-	testo: .asciiz "esempio di messaggio criptato"
+	testo: .asciiz "un testo piu' lung"
 	spazio: .space 256
 .text
 stampastringaoriginale:
@@ -58,11 +58,12 @@ salvalettera:
 	li $t3,0 		#$t3 diventa una variabile numerica uguale a 0 (non e' piu' un indirizzo)
 	sb $t1, ($s2) 		#si carica la lettera non doppia nello space
 	addi $s2,$s2,1		#si aumenta lo space per passare alla prossima posizione
-	move $t5,$s1 		#$t5 diventa il contatore che verra'  utilizzato in controllo a dx per non modificare $s1 e poterlo riutilizzare
+	move $t5,$s1 		#$t5 diventa il contatore che verra' utilizzato in controllo a dx per non modificare $s1 e poterlo riutilizzare
 	addi $s3,$s3,1
 
 controllodx:
 	bge $t5,$s3, spaziocarattere
+
 	lb $t4,($s4) 		#in $t4 carichiamo la lettera da confrontare
 	move $s6,$t5		#$s6 diventa il valore numerico di $t5 e lo utilizzeremo in "ciclonumero"
 
@@ -86,7 +87,7 @@ ciclonumero:
 	mfhi $t6
 	mflo $s6
 	sb $t6,0($sp)
-	beq $s6,0,caricaNumero 	#qui c'e' un errore, se e' 0 carica due volte lo 0
+	beq $s6,0,caricaNumero 
 	j ciclonumero
 
 caricaNumero:
@@ -96,8 +97,7 @@ caricaNumero:
 	addi $t3,$t3,48
 	sb $t3,($s2) 		#inserisce il valore preso dallo stack come carattere in space
 	addi $s2,$s2,1
-	beqz $t9,caricaNumero
-	addi $t5,$t5,1		####
+	bge $t9,1,caricaNumero	#quando fa piu' di un ciclo fa il ciclo
 	j controllodx
 
 uscita:
