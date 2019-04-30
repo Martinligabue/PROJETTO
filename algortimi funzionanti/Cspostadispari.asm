@@ -6,28 +6,27 @@
 	li $v0,4
 	la $a0,testoorig
 	syscall
-	
+
 	li $v0,4
 	la $a0,acapo #a capo
 	syscall
-	
+
 	la $t0,testoorig
 
-ciclo:#	stampa una a finché non 0 
+ciclo:#	stampa il carattere aumentato di 4 in posizione dispari
 	lb $t3,($t0)
 	beq $t3,0,exit
 	add $t2,$t3,4
 	div $t2,$t4
 	mfhi $t2
-	sb $t2,($t0) #imposta la A nella posizione di memoria del primo byte
+	sb $t2,($t0) #imposta il carattere nella posizione di memoria del primo byte in posizione dispari
 	add $t0,$t0,2#incrementa il contatore
-	
 	j ciclo
-	
+
 exit:
 	li $v0,4
 	la $a0,testoorig
 	syscall
-	
+
 	li $v0,10
 	syscall
