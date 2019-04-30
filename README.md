@@ -7,3 +7,4 @@ tipo il nostro priogeto  in mips
 
 
 usate github desktop per avere una cartella sinorimizzata per bene
+gg
