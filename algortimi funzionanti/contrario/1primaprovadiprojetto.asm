@@ -15,7 +15,7 @@
 ciclo:#	stampa una a finché non 0 
 	lb $t3,($t0)
 	beq $t3,0,exit
-	addi $t2,$t3,4
+	subi $t2,$t3,4
 	div $t2,$t4
 	mfhi $t2
 	sb $t2,($t0) #imposta la A nella posizione di memoria del primo byte
