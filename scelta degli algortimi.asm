@@ -1,5 +1,5 @@
-.data
-	CIAO: .asciiz "SCEGLI UN CAZZO DI ALGORMITMO O PIU' DI UNO, POI MUORI"
+yyYYYY.data
+	CIAO: .asciiz "SCEGLI UN CAZZO  ALGORMITMO O PIU' DI UNO, POI MUORI"
 	ordine: .space 5
 
 .text
