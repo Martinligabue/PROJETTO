@@ -1,5 +1,5 @@
 .data
-    testo: .asciiz "a-0-1-3 b-2"
+    testo: .asciiz "a-0-1-2-3"
     buffer: .space 256
 .text
 
@@ -17,12 +17,14 @@ contalunghezzatesto:
     addi $t0,$t0,1
     addi $t2,$t2,1
     j contalunghezzatesto
+
 reset:
 	move $s3,$t2#salvo lunghezza testo
 	li $t1,0
     li $t2,0
 	move $t0,$s0
     j main
+    
 main:#questo ciclo fa lettera per lettera
 	beq $s2,$s3,esci
 	lb $t1,($t0)
@@ -76,6 +78,7 @@ carica:
 	sb $t1,($t6) #salviamo in quella posizione la lettera
 	jal spostatesto
 	j trovaposizione
+
 esci:
 	li $v0,10
 	syscall
