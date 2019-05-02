@@ -1,0 +1,34 @@
+testo: "a-0-1 b-2-4"
+spazio: 256
+int carattere;
+int testo[];
+for(int i=0,i<testo.lenght,i++)
+{
+  carattere=testo[i];
+  cipolla=carattere;
+  carattere=carattere+2;
+  for(carattere.successivo!=' '){
+    if (carattere.successivo='-') {
+      cifra(i);
+    }
+    else
+    {
+      numero();
+    }
+    carattere+=2;
+  }
+}
+
+cifra(i){
+  converte in numero - 48;
+  spazio[i]=cipolla;
+}
+
+numero(){
+  for (cifra.hasNext){
+    totale=totale+cifra;
+    totale=totale*10;
+    cifra++;
+  }
+  spazio[i]=totale;
+}
