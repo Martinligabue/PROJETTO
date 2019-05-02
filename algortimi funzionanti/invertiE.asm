@@ -24,25 +24,25 @@ main:
 	beq $s2,$s3,esci
 	lb $t1,($t0)
 	jal trovaposizione
-	
+
 	addi $s2,$s2,1 #contatore numerico
-	addi $t0,$t0,1 #contatore indirizzico
+	addi $t0,$t0,1 #contatore indiririzzo
 	j main
-	
+
 tornaalmain:
 	addi $s2,$s2,1 #contatore numerico
-	addi $t0,$t0,1 #contatore indirizzico
+	addi $t0,$t0,1 #contatore indirizzo
 	j main
-	
+
 trovaposizione:
 	move $t3,$t0
 	addi $t3,$t3,1
 	lb $t4,($t3)
-	beq $t4,'-',trovatotrattino 
+	beq $t4,'-',trovatotrattino
 	beq $t4,' ',tornaalmain #si ferma
 	#altrimenti c'e' un numero
 	j trovaposizione
-	
+
 trovatotrattino:
 	addi $t3,$t3,1
 	lb $t4,($t3)
@@ -54,14 +54,14 @@ trovatotrattino:
 nontrattino:
 	bne $t5,' ',nonspazio
 	j doppiaalmeno
-	
+
 nonspazio:
 doppiaalmeno:
 salvacifra:
 	subi $t4,$t4,48
 	la $t0,buffer
 	j carica
-	
+
 carica:
 	addi $t5,$t5,1
 	addi $t0,$t0,1 #spostiamo l'indiririzzo...
