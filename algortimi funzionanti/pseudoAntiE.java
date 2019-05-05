@@ -1,7 +1,6 @@
-testo: "a-0-1 b-2-4"
-spazio: 256
-int carattere;
-int testo[];
+String testo="a-0-1 b-2-4";
+int spazio[256];
+char carattere;
 for(int i=0,i<testo.lenght,i++)
 {
   carattere=testo[i];

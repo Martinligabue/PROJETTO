@@ -23,7 +23,7 @@ main:
 	la salva
 	chiama i vari algoritmi in ordine e li fa lavorare sulla memoria
 	produce il file di output
-	
+
 	seconda parte:
 	fa tutto al contrario
 A:
@@ -43,11 +43,15 @@ E:
 		 Nella stringa " -7-10-20-29" il carattere in codifica è lo spazio (' ', codice ascii decimale 32), che appare nelle posizioni 7, 10, 20 e 29 del messaggio.
 		 Nella stringa "--30" il carattere in codifica è '-' (il secondo carattere '-' è il carattere separatore fra gli elementi della sequenza), che appare nella posizione 30 del messaggio.
 		 Nella stringa "1-31" il carattere in codifica è '1', che appare nella posizione 31 del messaggio.
-		
+
 	in altre parole: si prende il primo carattere, si scorre la lista, e ogni volta che compare lo salvi con "-n" con n posizione del carattere; quando hai finito con un carattere metti uno spazio e ricomincia finché \n
-	
+
 cose utili da implementare:
 	stack
 	buff.. ah no
 	tabella hash per chiamare i metodi (tipo choice in java)
 	syscall
+
+
+oltre a questo:
+fare l'antiE e il progetto non sarà ez, ma ci saltiamo fuori

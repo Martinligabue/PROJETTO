@@ -34,7 +34,7 @@ leggi:
 	la $a1, testo	# Load Buffer Address
 	li $a2, 256	# Buffer Size
 	syscall
-	j main
+	j main #looooop?
 
 carica: #salva il testo nelllo stack
 	lb $t1,($t0)
