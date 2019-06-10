@@ -7,12 +7,11 @@ sbuffer: .space 256
 .text
 
 	la $s0, testo
-	li $s1,-1			#facciamo in modo che non sia zero senno' il beqz risulta subito uguale a zero
-	j lunghezzatesto
+	li $s1,-1				#facciamo in modo che non sia zero senno' il beqz risulta subito uguale a zero
+	
+salvalettera:					#ciclo grande, da cmabiare di nome
 
-lunghezzatesto:				#ciclo grande, da cmabiare di nome
-
-	lb $s1,($s0)			#salviamo in s1 la letteraaaaa
+	lb $s1,($s0)				#salviamo in s1 la letteraaaaa
 	addi $s0,$s0,1
 	lb $t0,($s0)
 	bne $t0,'-',uscitaseria
@@ -22,7 +21,7 @@ lunghezzatesto:				#ciclo grande, da cmabiare di nome
 
 leggesalvanumero:
 
-	lb $s2,($s0)			#salviamo in t2 il primo numero
+	lb $s2,($s0)				#salviamo in t2 il primo numero
 	subi $s2,$s2,48
 
 	j controllonumero
@@ -57,7 +56,7 @@ convertesec:
 	sb $s1,($t1)
 	addi $s0,$s0,1
 
-	j lunghezzatesto
+	j salvalettera
 
 uscitaseria:
 
