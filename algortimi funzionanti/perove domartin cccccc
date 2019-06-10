@@ -1,20 +1,29 @@
 .data
 
 testo: .asciiz "l-0 a-1-4-7  -2 c-3-5-6"
-end: .asciiz "la frase cifrata era"
+end: .asciiz "la frase cifrata era: "
 sbuffer: .space 256
 
 .text
 	
 	la $s0, testo
 	li $s1,-1			#facciamo in modo che non sia zero senno' il beqz risulta subito uguale a zero
+	la $t0,testo
 	
-	j lunghezzatesto
-
+	j conta
+	
+	conta:
+	lb $t1,($t0)
+	beqz $t1,lunghezzatesto
+	addi $t0,$t0,1
+	addi $s3,$s3,1 		#in $s3 alla fine avremo la lunghezza del testo(in termini numerici)
+	j conta
 	
 lunghezzatesto:				#ciclo che...
-
-	#beqz $s1,uscitaseria
+	
+	sub $t8,$s0,$s3
+	beq $t8,(sbuffer),uscitaseria
+	#beqz $t8,uscitaseria
 	lb $s1,($s0)			#salviamo in s1 la letteraaaaa
 	addi $s0,$s0,1
 	lb $t0,($s0)

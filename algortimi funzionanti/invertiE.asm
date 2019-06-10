@@ -1,84 +1,95 @@
 .data
-    testo: .asciiz "a-0-1-2-3"
-    buffer: .space 256
+
+testo: .asciiz "l-0 a-1-4-7  -2 c-3-5-6"
+end: .asciiz "la frase cifrata era"
+sbuffer: .space 256
+
 .text
+	
+	la $s0, testo
+	li $s1,-1			#facciamo in modo che non sia zero senno' il beqz risulta subito uguale a zero
+	
+	j lunghezzatesto
 
-    la $s0,testo
+	
+lunghezzatesto:				#ciclo che...
 
-fraseiniziale:
-    li $v0,4
-    la $a0,testo
-    syscall
-    move $t0,$s0
+	#beqz $s1,uscitaseria
+	lb $s1,($s0)			#salviamo in s1 la letteraaaaa
+	addi $s0,$s0,1
+	lb $t0,($s0)
+	bne $t0,'-',uscitaseria
+	addi $s0,$s0,1
+	
+	j leggesalvanumero
+	
+leggesalvanumero:
 
-contalunghezzatesto:
-    lb $t1,($t0)
-    beqz $t1,reset
-    addi $t0,$t0,1
-    addi $t2,$t2,1
-    j contalunghezzatesto
+	lb $s2,($s0)			#salviamo in t2 il primo numero
+	subi $s2,$s2,48
+	
+	j controllonumero
+	
+controllonumero:
 
-reset:
-	move $s3,$t2#salvo lunghezza testo
-	li $t1,0
-    li $t2,0
-	move $t0,$s0
-    j main
-    
-main:#questo ciclo fa lettera per lettera
-	beq $s2,$s3,esci
-	lb $t1,($t0)
-	j trovaposizione
+	addi $s0,$s0,1
+	lb $t0,($s0)
+	beq $t0,'-',converteprim
+	beq $t0,' ',convertesec
+	subi $t0,$t0,48
+	move $t2,$t0
+	mul $s2,$s2,10
+	add $s2,$s2,$t2
+	
+	j controllonumero
+	
+	
+converteprim:
 
-	jal spostatesto
-	j main
+	la $t1, sbuffer 			#salviamo in t1 il buffer per poterci salvare la roba dentro
+	add $t1,$t1,$s2
+	sb $s1,($t1)
+	addi $s0,$s0,1
+	
+	j leggesalvanumero
+	
 
-spostatesto:
-    addi $s2,$s2,1 #contatore numerico
-    addi $t0,$t0,1 #contatore indirizzico
-    jr $ra
+convertesec:
 
-tornaalmain:
-	jal spostatesto
-	j main
+	la $t1, sbuffer 			#salviamo in t1 il buffer per poterci salvare la roba dentro
+	add $t1,$t1,$s2
+	sb $s1,($t1)
+	addi $s0,$s0,1
+	li $s1,-1
 
-trovaposizione:
-	move $t3,$t0
-    jal	spostatesto
-    addi $t3,$t3,1
-	lb $t4,($t3)
-	beq $t4,'-',trovatotrattino
-	beq $t4,' ',tornaalmain #si ferma
-	#altrimenti c'e' un numero
-	j trovaposizione
+	j lunghezzatesto
+	
+	
 
-trovatotrattino:
-	addi $t3,$t3,1
-	lb $t4,($t3)
-	addi $t5,$t3,1
-	lb $t5,($t5)
-	bne $t5,'-',nontrattino
-	j salvacifra
 
-nontrattino:
-	bne $t5,' ',nonspazio
-	j doppiaalmeno
 
-nonspazio:
-doppiaalmeno:
-salvacifra:
-	subi $t4,$t4,48
-	la $t6,buffer
-	j carica
 
-carica:
-	addi $t5,$t5,1
-	addi $t6,$t6,1 #spostiamo l'indiririzzo...
-	ble $t5,$t4,carica #...tante volte quante ne servono a un contatore per arrivare a t4
-	sb $t1,($t6) #salviamo in quella posizione la lettera
-	jal spostatesto
-	j trovaposizione
 
-esci:
+
+
+
+
+
+	
+
+
+
+
+
+uscitaseria:
+ 	
+ 	li $v0, 4
+ 	la $a0, end
+ 	syscall
+ 	
+ 	li $v0, 4
+	la $a0, sbuffer
+	syscall
+	
 	li $v0,10
 	syscall
