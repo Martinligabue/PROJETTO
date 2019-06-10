@@ -1,7 +1,7 @@
 .data
 
 testo: .asciiz "l-0 a-1-4-7  -2 c-3-5-6"
-end: .asciiz "la frase cifrata era"
+end: .asciiz "la frase cifrata era: "
 sbuffer: .space 256
 
 .text
@@ -14,7 +14,6 @@ sbuffer: .space 256
 	
 lunghezzatesto:				#ciclo che...
 
-	#beqz $s1,uscitaseria
 	lb $s1,($s0)			#salviamo in s1 la letteraaaaa
 	addi $s0,$s0,1
 	lb $t0,($s0)
@@ -36,6 +35,7 @@ controllonumero:
 	lb $t0,($s0)
 	beq $t0,'-',converteprim
 	beq $t0,' ',convertesec
+	beq $t0,0,convertesec
 	subi $t0,$t0,48
 	move $t2,$t0
 	mul $s2,$s2,10
@@ -60,28 +60,21 @@ convertesec:
 	add $t1,$t1,$s2
 	sb $s1,($t1)
 	addi $s0,$s0,1
-	li $s1,-1
 
 	j lunghezzatesto
 	
+convertiult:
 	
-
-
-
-
-
-
-
-
-
-
 	
-
-
-
-
-
+	la $t1, sbuffer 			#salviamo in t1 il buffer per poterci salvare la roba dentro
+	add $t1,$t1,$s2
+	sb $s1,($t1)
+	
+	j uscitaseria
+	
 uscitaseria:
+
+	
  	
  	li $v0, 4
  	la $a0, end
