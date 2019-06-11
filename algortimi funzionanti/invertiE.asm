@@ -7,11 +7,11 @@ sbuffer: .space 256
 .text
 
 	la $s0, testo
-	li $s1,-1				#facciamo in modo che non sia zero senno' il beqz risulta subito uguale a zero
-	
-salvalettera:					#ciclo grande, da cmabiare di nome
+	#li $s1,-1					#facciamo in modo che non sia zero senno' il beqz risulta subito uguale a zero
 
-	lb $s1,($s0)				#salviamo in s1 la letteraaaaa
+salvalettera:					#ciclo grande, da cambiare di nome
+
+	lb $s1,($s0)				#salviamo in s1 la lettera
 	addi $s0,$s0,1
 	lb $t0,($s0)
 	bne $t0,'-',uscitaseria
@@ -51,7 +51,7 @@ converteprim:
 
 convertesec:
 
-	la $t1, sbuffer 			#salviamo in t1 il buffer per poterci salvare la roba dentro
+	la $t1,sbuffer 			#salviamo in t1 il buffer per poterci salvare la roba dentro
 	add $t1,$t1,$s2
 	sb $s1,($t1)
 	addi $s0,$s0,1
