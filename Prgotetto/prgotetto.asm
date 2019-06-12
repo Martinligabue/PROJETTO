@@ -170,6 +170,31 @@ cicloC:
 	j cicloC
 
 algoritmoD:
+
+	move $t7, $t0
+	la $t0,buffer			 	#possiamo sovrascrivere t0
+
+carica: 					#salva il testo nelllo stack
+
+	lb $t1,($t0)
+	addi $sp,$sp,-4 	 		# crea spazio per 1 words nello stack frame partendo dalla posizione -4
+	sw $t1,0($sp)
+	addi $t0,$t0,1
+	bne $t1,$zero,carica 			# carica ogni bayte del testo origionale nello stack
+
+	la $t0, buffer				#carica l'indirizzo del testo originale in t0
+	addi $t0,$t0,-1
+
+scarica: 					# inverte il testo originale della frase
+
+	addi $sp,$sp,4
+	sb $t1,($t0) 				#carica l'indirizzo del primo byte di t1 in t0
+	addi $t0,$t0,1 				#somma ogni bayte di t0(t1) di per poi caricarli ed invertirli successivamente
+	lw $t1,0($sp)				#prende il valore proveniente dallo stack
+	bne $t1,$zero,scarica 			#controlla se il contore è arrivato alla posozione finale
+	
+	j exit
+
 algoritmoE:
 
 
