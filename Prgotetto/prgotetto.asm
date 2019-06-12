@@ -11,7 +11,7 @@ buffer2: .space 4
 
 .text
 
-open:
+open:						#dobbiamo inserire il caso di errore
 
 	li $v0, 13				# apriamo il file
 	la $a0, filein				# nome file
@@ -32,8 +32,8 @@ read:
 
 close:
 
- 	li  $v0, 16    			#
-  	move  $a0, $t0   		 	#
+ 	li  $v0, 16    			
+  	move  $a0, $t0   		 	
   	syscall
   	
   	li $t1, 0
@@ -68,7 +68,7 @@ readK:
 	li $v0, 14				# legge file chiave
 	move $a0, $t1
 	la $a1, buffer2				# salviamo nel buffer il contenuto del file chiave
-	li $a2, 4
+	li $a2, 4				#dobbiamo mettere il caso di errore
 	syscall
 
 closeK:
@@ -97,6 +97,7 @@ dopo:
 
 	move $s1, $t1
 	la $t0, buffer2
+	
 sceltaalgoritmo:
 	
 	lb $t2, ($t0)
@@ -112,11 +113,14 @@ sceltaalgoritmo:
 	syscall
 	
 	j uscita
+	
 algoritmoA:
 	
 	move $t7, $t0
 	la $t0,buffer			 	#possiamo sovrascrivere t0
+	
 cicloA:						#	stampa il carattere aumentato di 4
+
 	lb $t3,($t0)
 	beq $t3,0,exit
 	addi $t2,$t3,4
@@ -133,7 +137,9 @@ algoritmoB:
 	move $t7, $t0
 	la $t0,buffer			 	#possiamo sovrascrivere t0
 	addi $t0, $t0, 1
-cicloB:						#
+	
+cicloB:	
+					
 	lb $t3,($t0)
 	beq $t3,0,exit
 	addi $t2,$t3,4
@@ -146,6 +152,23 @@ cicloB:						#
 	j cicloB
 
 algoritmoC:
+
+	move $t7, $t0
+	la $t0,buffer			 	#possiamo sovrascrivere t0
+
+cicloC:
+						#
+	lb $t3,($t0)
+	beq $t3,0,exit
+	addi $t2,$t3,4
+	li $t3,256				#t3 non ci serve piu'
+	div $t2,$t3				#per evitare overflow
+	mfhi $t2
+	sb $t2,($t0) 				#imposta il carattere  nella posizione di memoria del primo byte
+	add $t0,$t0,2				#incrementa il contatore
+	
+	j cicloC
+
 algoritmoD:
 algoritmoE:
 
