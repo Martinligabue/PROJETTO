@@ -52,7 +52,7 @@ scarica: # inverte il testo originale della frase
 	sb $t1,($t0) #carica l'indirizzo del primo byte di t1 in t0
 	addi $t0,$t0,1 #somma ogni bayte di t0(t1) di per poi caricarli ed invertirli successivamente
 	lw $t1,0($sp)#prende il valore proveniente dallo stack
-	bne $t1,$zero,scarica #controlla se il contore è arrivato alla posozione finale
+	bne $t1,$zero,scarica #controlla se il contore è arrivato alla posizione finale
 
 exit:# esce e stampa la frase invertita
 
