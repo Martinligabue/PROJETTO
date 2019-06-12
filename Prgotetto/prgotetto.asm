@@ -129,6 +129,22 @@ cicloA:						#	stampa il carattere aumentato di 4
 	j cicloA
 
 algoritmoB:
+
+	move $t7, $t0
+	la $t0,buffer			 	#possiamo sovrascrivere t0
+	addi $t0, $t0, 1
+cicloB:						#
+	lb $t3,($t0)
+	beq $t3,0,exit
+	addi $t2,$t3,4
+	li $t3,256				#t3 non ci serve piu'
+	div $t2,$t3				#per evitare overflow
+	mfhi $t2
+	sb $t2,($t0) 				#imposta il carattere  nella posizione di memoria del primo byte
+	add $t0,$t0,2				#incrementa il contatore
+	
+	j cicloB
+
 algoritmoC:
 algoritmoD:
 algoritmoE:
