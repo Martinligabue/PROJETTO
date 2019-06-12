@@ -37,10 +37,12 @@ close:
   	syscall
   	
   	li $t1, 0
+  	
+  	la $t0, buffer
 
 lunghezzabuffer:
 
-	la $t0, buffer
+	
 	lb $t2, ($t0)
 	bge $t1, 128, openK
 	beq $t2, 0, openK
@@ -50,7 +52,8 @@ lunghezzabuffer:
 	j lunghezzabuffer
 	
 openK:
-
+	
+	move $s0, $t1
 	li $v0, 13				# apriamo il file chiave
 	la $a0, chiave				# nome file chiave
 	la $a1, 0				# legge e basta
@@ -76,10 +79,28 @@ closeK:
   	
 
 
-	la $t2, buffer2
+	la $t0, buffer2
+	li $t1, 0
 
+lunghezzabuffer2:
+
+	
+	lb $t2, ($t0)
+	bge $t1, 128, dopo
+	beq $t2, 0, dopo
+	addi $t1, $t1, 1
+	addi $t0, $t0, 1
+	
+	j lunghezzabuffer2
+
+dopo:
+
+	move $s1, $t1
+	la $t0, buffer2
 sceltaalgoritmo:
-
+	
+	lb $t2, ($t0)
+	ble $s1, 0, uscita			#bisogna mettere algoritmi inverso
 	beq $t2, 'A', algoritmoA
 	beq $t2, 'B', algoritmoB
 	beq $t2, 'C', algoritmoC
@@ -92,9 +113,10 @@ sceltaalgoritmo:
 	
 	j uscita
 algoritmoA:
-
+	
+	move $t7, $t0
 	la $t0,buffer			 	#possiamo sovrascrivere t0
-ciclo:						#	stampa il carattere aumentato di 4
+cicloA:						#	stampa il carattere aumentato di 4
 	lb $t3,($t0)
 	beq $t3,0,exit
 	addi $t2,$t3,4
@@ -104,7 +126,7 @@ ciclo:						#	stampa il carattere aumentato di 4
 	sb $t2,($t0) 				#imposta il carattere  nella posizione di memoria del primo byte
 	add $t0,$t0,1 				#incrementa il contatore
 	
-	j ciclo
+	j cicloA
 
 algoritmoB:
 algoritmoC:
@@ -122,7 +144,10 @@ uscita:
 
 
 exit:
-	addi $t2,$t2,1
+
+	move $t0, $t7
+	addi $t0,$t0,1
+	subi $s1, $s1, 1
 	j sceltaalgoritmo
 
 
