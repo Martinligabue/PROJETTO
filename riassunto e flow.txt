@@ -4,8 +4,8 @@ progetto, specifiche
 • Decifrare il messaggio di testo cifrato utilizzando la parola chiave invertita Ŝ= "Sk··· S1", ovvero invertendo gli Algoritmi di Cifratura e richiamandoli in ordine inverso (dall'ultimo algoritmo applicato al primo, ovvero da Sk a S1).
 
 Note:
-• la lunghezza massima k della parola chiave è pari a 5 caratteri, quindi S="S1∙∙∙Sk" con 1≤k≤5 (nella versione precedente del documento, k era uguale a 16);
-• il file di testo "messaggio.txt" contenente il messaggio di testo da cifrare è composto da un massimo di 256 caratteri (nella versione precedente del documento, il file poteva contenere fino a 1024 caratteri).
+• la lunghezza massima k della parola chiave è pari a 4 caratteri, quindi S="S1∙∙∙Sk" con 1≤k≤5 (nella versione precedente del documento, k era uguale a 16);
+• il file di testo "messaggio.txt" contenente il messaggio di testo da cifrare è composto da un massimo di 128 caratteri (nella versione precedente del documento, il file poteva contenere fino a 1024 caratteri).
 
 Altre note: Si consiglia in particolare di implementare ogni cifrario (ciascun algoritmo A-B-C-D-E, e le loro inversioni per la decifratura) come una procedura.
 
