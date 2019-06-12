@@ -32,10 +32,23 @@ read:
 
 close:
 
- 	 li  $v0, 16    			#
+ 	li  $v0, 16    			#
   	move  $a0, $t0   		 	#
   	syscall
+  	
+  	li $t1, 0
 
+lunghezzabuffer:
+
+	la $t0, buffer
+	lb $t2, ($t0)
+	bge $t1, 128, openK
+	beq $t2, 0, openK
+	addi $t1, $t1, 1
+	addi $t0, $t0, 1
+	
+	j lunghezzabuffer
+	
 openK:
 
 	li $v0, 13				# apriamo il file chiave
@@ -60,10 +73,13 @@ closeK:
  	 li  $v0, 16    			#
   	move  $a0, $t1  		 	#
   	syscall
+  	
+
+
+	la $t2, buffer2
 
 sceltaalgoritmo:
 
-	la $t2, buffer2
 	beq $t2, 'A', algoritmoA
 	beq $t2, 'B', algoritmoB
 	beq $t2, 'C', algoritmoC
@@ -73,26 +89,34 @@ sceltaalgoritmo:
 	li $v0, 4
 	la $a0, testoerrorealgoritmo
 	syscall
-
+	
+	j uscita
 algoritmoA:
 
-	la $t0,buffer #possiamo sovrascrivere t0
-ciclo:#	stampa il carattere aumentato di 4
+	la $t0,buffer			 	#possiamo sovrascrivere t0
+ciclo:						#	stampa il carattere aumentato di 4
 	lb $t3,($t0)
 	beq $t3,0,exit
 	addi $t2,$t3,4
-	li $t3,256	#t3 non ci serve più
-	div $t2,$t3	#per evitare overflow
+	li $t3,256				#t3 non ci serve più
+	div $t2,$t3				#per evitare overflow
 	mfhi $t2
-	sb $t2,($t0) #imposta il carattere  nella posizione di memoria del primo byte
-	add $t0,$t0,1 #incrementa il contatore
+	sb $t2,($t0) 				#imposta il carattere  nella posizione di memoria del primo byte
+	add $t0,$t0,1 				#incrementa il contatore
+	
 	j ciclo
 
+algoritmoB:
+algoritmoC:
+algoritmoD:
+algoritmoE:
 
 
 
+uscita:
 
-
+	li $v0, 10
+	syscall
 
 
 
