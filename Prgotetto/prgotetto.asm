@@ -32,27 +32,27 @@ read:
 
 close:
 
- 	li  $v0, 16    			
-  	move  $a0, $t0   		 	
+ 	li  $v0, 16
+  	move  $a0, $t0
   	syscall
-  	
+
   	li $t1, 0
-  	
+
   	la $t0, buffer
 
 lunghezzabuffer:
 
-	
+
 	lb $t2, ($t0)
 	bge $t1, 128, openK
 	beq $t2, 0, openK
 	addi $t1, $t1, 1
 	addi $t0, $t0, 1
-	
+
 	j lunghezzabuffer
-	
+
 openK:
-	
+
 	move $s0, $t1
 	li $v0, 13				# apriamo il file chiave
 	la $a0, chiave				# nome file chiave
@@ -76,7 +76,7 @@ closeK:
  	 li  $v0, 16    			#
   	move  $a0, $t1  		 	#
   	syscall
-  	
+
 
 
 	la $t0, buffer2
@@ -84,22 +84,22 @@ closeK:
 
 lunghezzabuffer2:
 
-	
+
 	lb $t2, ($t0)
 	bge $t1, 128, dopo
 	beq $t2, 0, dopo
 	addi $t1, $t1, 1
 	addi $t0, $t0, 1
-	
+
 	j lunghezzabuffer2
 
 dopo:
 
 	move $s1, $t1
 	la $t0, buffer2
-	
+
 sceltaalgoritmo:
-	
+
 	lb $t2, ($t0)
 	ble $s1, 0, uscita			#bisogna mettere algoritmi inverso
 	beq $t2, 'A', algoritmoA
@@ -111,14 +111,14 @@ sceltaalgoritmo:
 	li $v0, 4
 	la $a0, testoerrorealgoritmo
 	syscall
-	
+
 	j uscita
-	
+
 algoritmoA:
-	
+
 	move $t7, $t0
 	la $t0,buffer			 	#possiamo sovrascrivere t0
-	
+
 cicloA:						#	stampa il carattere aumentato di 4
 
 	lb $t3,($t0)
@@ -129,7 +129,7 @@ cicloA:						#	stampa il carattere aumentato di 4
 	mfhi $t2
 	sb $t2,($t0) 				#imposta il carattere  nella posizione di memoria del primo byte
 	add $t0,$t0,1 				#incrementa il contatore
-	
+
 	j cicloA
 
 algoritmoB:
@@ -137,9 +137,9 @@ algoritmoB:
 	move $t7, $t0
 	la $t0,buffer			 	#possiamo sovrascrivere t0
 	addi $t0, $t0, 1
-	
-cicloB:	
-					
+
+cicloB:
+
 	lb $t3,($t0)
 	beq $t3,0,exit
 	addi $t2,$t3,4
@@ -148,7 +148,7 @@ cicloB:
 	mfhi $t2
 	sb $t2,($t0) 				#imposta il carattere  nella posizione di memoria del primo byte
 	add $t0,$t0,2				#incrementa il contatore
-	
+
 	j cicloB
 
 algoritmoC:
@@ -166,7 +166,7 @@ cicloC:
 	mfhi $t2
 	sb $t2,($t0) 				#imposta il carattere  nella posizione di memoria del primo byte
 	add $t0,$t0,2				#incrementa il contatore
-	
+
 	j cicloC
 
 algoritmoD:
@@ -180,7 +180,7 @@ carica: 					#salva il testo nelllo stack
 	addi $sp,$sp,-4 	 		# crea spazio per 1 words nello stack frame partendo dalla posizione -4
 	sw $t1,0($sp)
 	addi $t0,$t0,1
-	bne $t1,$zero,carica 			# carica ogni bayte del testo origionale nello stack
+	bne $t1,$zero,carica 			# carica ogni byte del testo origionale nello stack
 
 	la $t0, buffer				#carica l'indirizzo del testo originale in t0
 	addi $t0,$t0,-1
@@ -191,8 +191,8 @@ scarica: 					# inverte il testo originale della frase
 	sb $t1,($t0) 				#carica l'indirizzo del primo byte di t1 in t0
 	addi $t0,$t0,1 				#somma ogni bayte di t0(t1) di per poi caricarli ed invertirli successivamente
 	lw $t1,0($sp)				#prende il valore proveniente dallo stack
-	bne $t1,$zero,scarica 			#controlla se il contore è arrivato alla posozione finale
-	
+	bne $t1,$zero,scarica 			#controlla se il contore e' arrivato alla posozione finale
+
 	j exit
 
 algoritmoE:
@@ -228,7 +228,7 @@ conta:
 	lb $t1,($t0)
 	beqz $t1,prelettura
 	addi $t0,$t0,1
-	addi $s3,$s3,1 		#in $s3 alla fine avremo la lunghezza del testo(in termini numerici)
+	addi $s3,$s3,1 		#in $s3 alla fine avremo la lunghezza del testo (in termini numerici)
 	j conta
 
 spaziocarattere:
@@ -294,7 +294,7 @@ ciclonumero:
 	mfhi $t6
 	mflo $s6
 	sb $t6,0($sp)
-	beq $s6,0,caricaNumero 
+	beq $s6,0,caricaNumero
 	j ciclonumero
 
 caricaNumero:
