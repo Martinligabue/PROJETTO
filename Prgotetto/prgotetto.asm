@@ -219,8 +219,8 @@ algoritmoE:
 
 
 inizio:
-	la $s0,testo		#impostiamo le variabili $s0, e $s2 rispettivamente a testo e spazio
-	la $s2,spazio
+	la $s0,buffer		#impostiamo le variabili $s0, e $s2 rispettivamente a testo e spazio
+	la $s2,buffer		#da impostare con un buffer temporaneo
 	move $t0, $s0		#creiamo una variable con lo stesso valore di -testo-
 	li $s1, -1
 
@@ -242,7 +242,7 @@ prelettura:
 	move $t0, $s0
 
 lettura:
-	bge $s1,$s3,uscita
+	bge $s1,$s3,exit
 	lb $t1,($t0) 		#carico in $t1 la prima lettera del testo(f)
 	move $s4,$t0 		#in $s4 mettiamo l'indirizzo della lettera che analizzeremo per poi utilizzarlo in "controllodx"
 	addi $t0,$t0,1 		#contatore dell'indirizzo della lettera
