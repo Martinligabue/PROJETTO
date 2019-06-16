@@ -74,8 +74,8 @@ readK:
 closeK:
 
  	 li  $v0, 16    			#
-  	move  $a0, $t1  		 	#
-  	syscall
+	 move  $a0, $t1  		 	#
+	 syscall
 
 
 
@@ -197,25 +197,13 @@ scarica: 					# inverte il testo originale della frase
 
 algoritmoE:
 
+salvaStack:
+subi $sp,$sp,12
+sw $t0,0($sp)
+sw $s0,4($sp)
+sw $s1,8($sp)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+resetValori:
 
 
 inizio:
@@ -242,7 +230,7 @@ prelettura:
 	move $t0, $s0
 
 lettura:
-	bge $s1,$s3,exit
+	bge $s1,$s3,rirpristinaStack
 	lb $t1,($t0) 		#carico in $t1 la prima lettera del testo(f)
 	move $s4,$t0 		#in $s4 mettiamo l'indirizzo della lettera che analizzeremo per poi utilizzarlo in "controllodx"
 	addi $t0,$t0,1 		#contatore dell'indirizzo della lettera
@@ -307,21 +295,11 @@ caricaNumero:
 	bge $t9,1,caricaNumero	#quando fa piu' di un ciclo fa il ciclo
 	j controllodx
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+rirpristinaStack:
+sw $t0,0($sp)
+sw $s0,4($sp)
+sw $s1,8($sp)
+addi $sp,$sp,12
 
 
 
