@@ -207,8 +207,7 @@ salvaStack:
 resetValori:
 li $t0,0
 li $t9,0
-li $s3,0
-
+li $s1,0
 inizio:
 	la $s0,buffer		#impostiamo le variabili $s0, e $s2 rispettivamente a testo e spazio
 	la $s2,bufferTemp		#da impostare con un buffer temporaneo
@@ -250,7 +249,6 @@ salvalettera:
 	sb $t1, ($s2) 		#si carica la lettera non doppia nello space
 	addi $s2,$s2,1		#si aumenta lo space per passare alla prossima posizione
 	move $t5,$s1 		#$t5 diventa il contatore che verra' utilizzato in controllo a dx per non modificare $s1 e poterlo riutilizzare
-#	addi $s3,$s3,1		#probabilmente non serve a niente
 
 controllodx:
 	bge $t5,$s3, spaziocarattere
