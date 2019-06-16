@@ -204,7 +204,9 @@ sw $s0,4($sp)
 sw $s1,8($sp)
 
 resetValori:
-
+li $t0,0
+li $t9,0
+li $s3,0
 
 inizio:
 	la $s0,buffer		#impostiamo le variabili $s0, e $s2 rispettivamente a testo e spazio
@@ -235,7 +237,7 @@ lettura:
 	move $s4,$t0 		#in $s4 mettiamo l'indirizzo della lettera che analizzeremo per poi utilizzarlo in "controllodx"
 	addi $t0,$t0,1 		#contatore dell'indirizzo della lettera
 	addi $s1,$s1,1 		#contatore della lettera che leggiamo
-	li $t2, 0	 	#contatore che parte da 0 per il controllo a sx #####si potrebbe togliere
+	li $t2, 0	 	#contatore che parte da 0 per il controllo a sx####forse, se abbiamo voglia, lo mettiamo nel resetta
 	move $t3, $s0 		#si resetta sempre al primo indirizzo del testo
 
 	j controllosx
