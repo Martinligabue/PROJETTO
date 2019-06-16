@@ -1,5 +1,5 @@
 .data
-	testo: .asciiz "aaaaaaba"
+	testo: .asciiz "la cacca puzza"
 	spazio: .space 256
 .text
 stampastringaoriginale:
@@ -59,7 +59,7 @@ salvalettera:
 	sb $t1, ($s2) 		#si carica la lettera non doppia nello space
 	addi $s2,$s2,1		#si aumenta lo space per passare alla prossima posizione
 	move $t5,$s1 		#$t5 diventa il contatore che verra' utilizzato in controllo a dx per non modificare $s1 e poterlo riutilizzare
-	addi $s3,$s3,1
+	#addi $s3,$s3,1
 
 controllodx:
 	bge $t5,$s3, spaziocarattere

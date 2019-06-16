@@ -8,6 +8,7 @@ filedecifr: .asciiz "messaggioDecifrato.txt"
 filecifr: .asciiz "messaggioCifrato.txt"
 buffer: .space 128
 buffer2: .space 4
+bufferTemp: .space 256
 
 .text
 
@@ -198,11 +199,11 @@ scarica: 					# inverte il testo originale della frase
 algoritmoE:
 
 salvaStack:
-subi $sp,$sp,12
-sw $t0,0($sp)
-sw $s0,4($sp)
-sw $s1,8($sp)
-
+	subi $sp,$sp,12
+	sw $t0,0($sp)
+	sw $s0,4($sp)
+	sw $s1,8($sp)
+	move $s3,$s0 #imposta a $s3 la lunghezza di buffer
 resetValori:
 li $t0,0
 li $t9,0
@@ -210,16 +211,9 @@ li $s3,0
 
 inizio:
 	la $s0,buffer		#impostiamo le variabili $s0, e $s2 rispettivamente a testo e spazio
-	la $s2,buffer		#da impostare con un buffer temporaneo
+	la $s2,bufferTemp		#da impostare con un buffer temporaneo
 	move $t0, $s0		#creiamo una variable con lo stesso valore di -testo-
 	li $s1, -1
-
-conta:
-	lb $t1,($t0)
-	beqz $t1,prelettura
-	addi $t0,$t0,1
-	addi $s3,$s3,1 		#in $s3 alla fine avremo la lunghezza del testo (in termini numerici)
-	j conta
 
 spaziocarattere:
 	li $t8, ' '
@@ -256,7 +250,7 @@ salvalettera:
 	sb $t1, ($s2) 		#si carica la lettera non doppia nello space
 	addi $s2,$s2,1		#si aumenta lo space per passare alla prossima posizione
 	move $t5,$s1 		#$t5 diventa il contatore che verra' utilizzato in controllo a dx per non modificare $s1 e poterlo riutilizzare
-	addi $s3,$s3,1
+#	addi $s3,$s3,1		#probabilmente non serve a niente
 
 controllodx:
 	bge $t5,$s3, spaziocarattere
@@ -303,7 +297,7 @@ sw $s0,4($sp)
 sw $s1,8($sp)
 addi $sp,$sp,12
 
-
+j sceltaalgoritmo
 
 
 uscita:
@@ -320,42 +314,6 @@ exit:
 	addi $t0,$t0,1
 	subi $s1, $s1, 1
 	j sceltaalgoritmo
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
