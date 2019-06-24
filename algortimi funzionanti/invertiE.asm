@@ -7,7 +7,7 @@ sbuffer: .space 256
 .text
 
 	la $s0, testo
-	#li $s1,-1					#facciamo in modo che non sia zero senno' il beqz risulta subito uguale a zero
+	#li $s1,-1				#facciamo in modo che non sia zero senno' il beqz risulta subito uguale a zero
 
 salvalettera:					#ciclo grande, da cambiare di nome
 

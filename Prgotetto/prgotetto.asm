@@ -145,7 +145,7 @@ cicloA:						#	stampa il carattere aumentato di 4
 	lb $t3,($t0)
 	beq $t3,0,exit
 	addi $t2,$t3,4
-	li $t3,256				#t3 non ci serve più
+	li $t3,256				#t3 non ci serve pi�
 	div $t2,$t3				#per evitare overflow
 	mfhi $t2
 	sb $t2,($t0) 				#imposta il carattere  nella posizione di memoria del primo byte
@@ -367,7 +367,31 @@ invertialgoritmoE:
 
 stampacriptato:
 
-						filecifr
+	li	$v0, 13							# Open File Syscall
+	la	$a0, filecifr				# Load File Name
+	li  $a1, 1
+	li  $a2, 0
+	syscall
+
+	move	$t1, $v0	# Save File Descriptor
+
+	li		$v0, 15		# W		ite File Syscall
+	move 	$a0, $t1		#  = $a0, $t1    	# Load File Descriptor
+	la		$a1, buffer	# L		ad Buffer Address
+	li		$a2, 128	# Buf		er Size
+	syscall
+
+# Close File
+
+	li	$v0, 16		# Close File Syscall
+	move	$a0, $t6	# Load File Descriptor
+	syscall
+	li	$v0, 16		# Close File Syscall
+	move	$a0, $t1	# Load File Descriptor
+	syscall
+	j	invertialgoritmi
+		# Goto End
+
 
 uscita:
 
