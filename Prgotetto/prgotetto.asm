@@ -337,8 +337,11 @@ ciclorirpristina:
 	lw $s0, 4($sp)
 	lw $s1, 8($sp)
 	addi $sp, $sp, 12
-
-	j exit
+	
+	addi $t0,$t0,1
+	subi $s1, $s1, 1
+	
+	j sceltaalgoritmo
 
 
 invertialgoritmoA:
