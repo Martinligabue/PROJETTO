@@ -97,13 +97,13 @@ lunghezzabuffer2:
 dopo:
 
 	move $s1, $t1					#salvo in $s1 e $s7 la lunghezza del testo CHIAVE
-	move $s7, $t1					
+	move $s7, $t1
 	la $t0, buffer2
 
 sceltaalgoritmo:
 
 	lb $t2, ($t0)
-	ble $s1, 0, preinverti			#bisogna mettere algoritmi inverso
+	ble $s1, 0, stampacriptato			#bisogna mettere algoritmi inverso
 	beq $t2, 'A', algoritmoA
 	beq $t2, 'B', algoritmoB
 	beq $t2, 'C', algoritmoC
@@ -115,12 +115,12 @@ sceltaalgoritmo:
 	syscall
 
 	j uscita
-	
+
 preinverti:
 
 	la $t0, buffer2				#salvo in $t0 il testo chiave e lo faccio partire dall'ultimo carattere
 	addi $t0, $t0, 4
-	
+
 invertialgoritmi:
 
 	lb $t2, ($t0)
@@ -130,9 +130,9 @@ invertialgoritmi:
 	beq $t2, 'C', invertialgoritmoC
 	beq $t2, 'D', invertialgoritmoD
 	beq $t2, 'E', invertialgoritmoE
-	
+
 	subi $t0, $t0, 1
-	
+
 	j invertialgoritmi
 
 algoritmoA:
@@ -229,7 +229,7 @@ resetValori:
 	li $t0,0
 	li $t9,0
 	li $s1,0
-	
+
 inizio:
 
 	la $s0,buffer				#impostiamo le variabili $s0, e $s2 rispettivamente a testo e spazio
@@ -322,20 +322,20 @@ caricaNumero:
 	j controllodx
 
 rirpristinaStack:
-	
+
 	lw $t0, 0($sp)
 	lw $s0, 4($sp)
 	lw $s1, 8($sp)
 	addi $sp, $sp, 12
 
 	j exit
-	
-	
+
+
 invertialgoritmoA:
 
 	move $t7, $t0
-	la $t0, buffer	
-	
+	la $t0, buffer
+
 cicloinvA:
 
 	lb $t3, ($t0)
@@ -348,7 +348,7 @@ cicloinvA:
 	add $t0, $t0, 1				#incrementa il contatore
 
 	j cicloinvA
-	
+
 invertialgoritmoB:
 	#inverti B
 	j exitinvertito
@@ -364,6 +364,10 @@ invertialgoritmoD:
 invertialgoritmoE:
 	#inverti e
 	j exitinvertito
+
+stampacriptato:
+
+						filecifr
 
 uscita:
 
@@ -382,17 +386,16 @@ exitinvertito:
 	move $t0, $t7
 	addi $t0, $t0, -1
 	subi $s7, $s7, 1
-	
+
 	j invertialgoritmi
-	
+
 errore:
 
 	li $v0, 4
 	la $a0, testo
 	syscall
-	
+
 fine:
-	
+
 	li $v0, 10
 	syscall
-	
