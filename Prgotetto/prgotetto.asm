@@ -6,9 +6,9 @@ filein: .asciiz "messaggio.txt"
 chiave: .asciiz "chiave.txt"
 filedecifr: .asciiz "messaggioDecifrato.txt"
 filecifr: .asciiz "messaggioCifrato.txt"
-buffer: .space 128
+buffer: .space 256
 buffer2: .space 4
-bufferTemp: .space 128
+bufferTemp: .space 256
 
 .text
 
