@@ -124,7 +124,7 @@ preinverti:
 invertialgoritmi:
 
 	lb $t2, ($t0)
-	ble $s7, 0, fine			#da impostare il metodo fine per far terminare il programma
+	ble $s7, 0, stampadecriptato			#da impostare il metodo fine per far terminare il programma
 	beq $t2, 'A', invertialgoritmoA
 	beq $t2, 'B', invertialgoritmoB
 	beq $t2, 'C', invertialgoritmoC
@@ -145,7 +145,7 @@ cicloA:						#	stampa il carattere aumentato di 4
 	lb $t3,($t0)
 	beq $t3,0,exit
 	addi $t2,$t3,4
-	li $t3,256				#t3 non ci serve pi�
+	li $t3,256				#t3 non ci serve piu'
 	div $t2,$t3				#per evitare overflow
 	mfhi $t2
 	sb $t2,($t0) 				#imposta il carattere  nella posizione di memoria del primo byte
@@ -178,7 +178,7 @@ algoritmoC:
 	la $t0,buffer			 	#possiamo sovrascrivere t0
 
 cicloC:
-						#
+
 	lb $t3,($t0)
 	beq $t3,0,exit
 	addi $t2,$t3,4
@@ -322,10 +322,13 @@ caricaNumero:
 	j controllodx
 
 ripristinaStack:
+
 	li $t0,0
 	la $t1,buffer 				#posizione nel buffer temp
 	la $t2,bufferTemp
+
 ciclorirpristina:
+
 	addi $t0, $t0, 1
 	addi $t1, $t1, 1
 	addi $t2, $t2, 1
@@ -343,10 +346,12 @@ ciclorirpristina:
 
 	j sceltaalgoritmo
 
+################################################################################
 
 invertialgoritmoA:
 
 	move $t7, $t0
+	li $t4,256
 	la $t0, buffer
 
 cicloinvA:
@@ -363,8 +368,24 @@ cicloinvA:
 	j cicloinvA
 
 invertialgoritmoB:
-	#inverti B
-	j exitinvertito
+
+move $t7, $t0
+li $t4,256
+la $t0, buffer
+addi $t0, $t0, 1
+
+cicloinvB:
+
+lb $t3, ($t0)
+beq $t3, 0, exitinvertito
+subi $t2, $t3, 4			#toglie 4 posizioni all'ascii
+#addi $t2, $t2, 256			#aggiunge 256 per evitare l'underflow in caso di file danneggiato
+div $t2, $t4
+mfhi $t2
+sb $t2, ($t0)				#imposta la lettera nella posizione di memoria del primo byte
+add $t0, $t0, 2				#incrementa il contatore
+
+j cicloinvB
 
 invertialgoritmoC:
 	#inverti C
@@ -396,15 +417,39 @@ stampacriptato:
 
 # Close File
 
-	li	$v0, 16		# Close File Syscall
+	li		$v0, 16		# Close File Syscall
 	move	$a0, $t6	# Load File Descriptor
 	syscall
-	li	$v0, 16		# Close File Syscall
+	li		$v0, 16		# Close File Syscall
 	move	$a0, $t1	# Load File Descriptor
 	syscall
 	j	invertialgoritmi
 		# Goto End
+stampadecriptato:
 
+			li	$v0, 13							# Open File Syscall
+			la	$a0, filedecifr				# Load File Name
+			li  $a1, 1
+			li  $a2, 0
+			syscall
+
+			move	$t1, $v0	# Save File Descriptor
+
+			li		$v0, 15		# W		ite File Syscall
+			move 	$a0, $t1		#  = $a0, $t1    	# Load File Descriptor
+			la		$a1, buffer	# L		ad Buffer Address
+			li		$a2, 128	# Buf		er Size
+			syscall
+
+		# Close File
+
+			li	$v0, 16		# Close File Syscall
+			move	$a0, $t6	# Load File Descriptor
+			syscall
+			li	$v0, 16		# Close File Syscall
+			move	$a0, $t1	# Load File Descriptor
+			syscall
+			j	fine##aaaa
 
 uscita:
 
