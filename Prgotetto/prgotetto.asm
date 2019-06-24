@@ -8,7 +8,7 @@ filedecifr: .asciiz "messaggioDecifrato.txt"
 filecifr: .asciiz "messaggioCifrato.txt"
 buffer: .space 128
 buffer2: .space 4
-bufferTemp: .space 256
+bufferTemp: .space 128
 
 .text
 
@@ -145,7 +145,7 @@ cicloA:						#	stampa il carattere aumentato di 4
 	lb $t3,($t0)
 	beq $t3,0,exit
 	addi $t2,$t3,4
-	li $t3,256				#t3 non ci serve più
+	li $t3,256				#t3 non ci serve piï¿½
 	div $t2,$t3				#per evitare overflow
 	mfhi $t2
 	sb $t2,($t0) 				#imposta il carattere  nella posizione di memoria del primo byte
@@ -251,7 +251,7 @@ prelettura:
 
 lettura:
 
-	bge $s1,$s3,rirpristinaStack
+	bge $s1,$s3,ripristinaStack
 	lb $t1,($t0) 				#carico in $t1 la prima lettera del testo(f)
 	move $s4,$t0 				#in $s4 mettiamo l'indirizzo della lettera che analizzeremo per poi utilizzarlo in "controllodx"
 	addi $t0,$t0,1 				#contatore dell'indirizzo della lettera
@@ -321,7 +321,15 @@ caricaNumero:
 	bge $t9,1,caricaNumero			#quando fa piu' di un ciclo fa il ciclo
 	j controllodx
 
-rirpristinaStack:
+ripristinaStack:
+	li $t0,0
+	la $t1,buffer #posizione nel buffer temp
+	la $t2,bufferTemp
+	addi $t0, $t0, 1
+	addi $t1, $t1, 1
+	addi $t2, $t2, 1
+	move $t1,$t2 #imposta un byte di buffer uguale a bufftemp
+	ble $t0,127,ripristinaStack
 
 	lw $t0, 0($sp)
 	lw $s0, 4($sp)
