@@ -6,9 +6,9 @@ filein: .asciiz "messaggio.txt"
 chiave: .asciiz "chiave.txt"
 filedecifr: .asciiz "messaggioDecifrato.txt"
 filecifr: .asciiz "messaggioCifrato.txt"
-buffer: .space 256
+buffer: .space 128
 buffer2: .space 4
-bufferTemp: .space 256
+bufferTemp: .space 128
 
 .text
 
@@ -337,10 +337,10 @@ ciclorirpristina:
 	lw $s0, 4($sp)
 	lw $s1, 8($sp)
 	addi $sp, $sp, 12
-	
+
 	addi $t0,$t0,1
 	subi $s1, $s1, 1
-	
+
 	j sceltaalgoritmo
 
 
