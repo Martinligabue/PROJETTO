@@ -329,8 +329,8 @@ ciclorirpristina:
 	addi $t0, $t0, 1
 	addi $t1, $t1, 1
 	addi $t2, $t2, 1
-	lb $t2,($t3)
-	sb $t1,($t3)
+	lb $t3,($t2)
+	sb $t3,($t1)
 	ble $t0,127,ciclorirpristina
 
 	lw $t0, 0($sp)
