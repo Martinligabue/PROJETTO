@@ -369,30 +369,66 @@ cicloinvA:
 
 invertialgoritmoB:
 
-move $t7, $t0
-li $t4,256
-la $t0, buffer
-addi $t0, $t0, 1
+	move $t7, $t0
+	li $t4,256
+	la $t0, buffer
+	addi $t0, $t0, 1
 
 cicloinvB:
 
-lb $t3, ($t0)
-beq $t3, 0, exitinvertito
-subi $t2, $t3, 4			#toglie 4 posizioni all'ascii
-#addi $t2, $t2, 256			#aggiunge 256 per evitare l'underflow in caso di file danneggiato
-div $t2, $t4
-mfhi $t2
-sb $t2, ($t0)				#imposta la lettera nella posizione di memoria del primo byte
-add $t0, $t0, 2				#incrementa il contatore
+	lb $t3, ($t0)
+	beq $t3, 0, exitinvertito
+	subi $t2, $t3, 4			#toglie 4 posizioni all'ascii
+	div $t2, $t4
+	mfhi $t2
+	sb $t2, ($t0)				#imposta la lettera nella posizione di memoria del primo byte
+	add $t0, $t0, 2				#incrementa il contatore
 
-j cicloinvB
+	j cicloinvB
 
 invertialgoritmoC:
-	#inverti C
-	j exitinvertito
+
+	move $t7, $t0
+	li $t4,256
+	la $t0, buffer
+
+cicloinvC:
+
+	lb $t3, ($t0)
+	beq $t3, 0, exitinvertito
+	subi $t2, $t3, 4			#toglie 4 posizioni all'ascii
+	div $t2, $t4
+	mfhi $t2
+	sb $t2, ($t0)				#imposta la lettera nella posizione di memoria del primo byte
+	add $t0, $t0, 2				#incrementa il contatore
+
+	j cicloinvC
+
 
 invertialgoritmoD:
-	#inverti D
+
+move $t7, $t0
+la $t0,buffer			 	#possiamo sovrascrivere t0
+
+caricainv: 					#salva il testo nelllo stack
+
+lb $t1,($t0)
+addi $sp,$sp,-4 	 		# crea spazio per 1 words nello stack frame partendo dalla posizione -4
+sw $t1,0($sp)
+addi $t0,$t0,1
+bne $t1,$zero,caricainv 			# carica ogni byte del testo origionale nello stack
+
+la $t0, buffer				#carica l'indirizzo del testo originale in t0
+addi $t0,$t0,-1
+
+scaricainv: 					# inverte il testo originale della frase
+
+addi $sp,$sp,4
+sb $t1,($t0) 				#carica l'indirizzo del primo byte di t1 in t0
+addi $t0,$t0,1 				#somma ogni bayte di t0(t1) di per poi caricarli ed invertirli successivamente
+lw $t1,0($sp)				#prende il valore proveniente dallo stack
+bne $t1,$zero,scaricainv 			#controlla se il contore e' arrivato alla posozione finale
+
 	j exitinvertito
 
 invertialgoritmoE:
