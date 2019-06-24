@@ -323,13 +323,15 @@ caricaNumero:
 
 ripristinaStack:
 	li $t0,0
-	la $t1,buffer #posizione nel buffer temp
+	la $t1,buffer 				#posizione nel buffer temp
 	la $t2,bufferTemp
+ciclorirpristina:
 	addi $t0, $t0, 1
 	addi $t1, $t1, 1
 	addi $t2, $t2, 1
-	move $t1,$t2 #imposta un byte di buffer uguale a bufftemp
-	ble $t0,127,ripristinaStack
+	lb $t2,($t3)
+	sb $t1,($t3)
+	ble $t0,127,ciclorirpristina
 
 	lw $t0, 0($sp)
 	lw $s0, 4($sp)
