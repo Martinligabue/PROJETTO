@@ -119,7 +119,7 @@ sceltaalgoritmo:
 preinverti:
 
 	la $t0, buffer2				#salvo in $t0 il testo chiave e lo faccio partire dall'ultimo carattere
-	subi $t0, $t0, 124
+	addi $t0, $t0, 4
 
 invertialgoritmi:
 
@@ -336,7 +336,7 @@ cicloripristina:			#copia nel buffer
 	addi $t2, $t2, 1
 	lb $t3,($t2)
 	sb $t3,($t1)
-	ble $t0,127,cicloripristina
+	ble $t0,126,cicloripristina
 
 	lw $t0, 0($sp)
 	lw $s0, 4($sp)
@@ -450,7 +450,8 @@ resetValoriinv:
 	li $s1,0
 
 	la $s0, buffer
-
+	addi $s0, $s0, 1
+	
 salvaletterainv:				#ciclo grande, da cambiare di nome
 
 	lb $s1,($s0)				#salviamo in s1 la lettera
@@ -501,10 +502,10 @@ convertesecinv:
 	j salvaletterainv
 
 exitE:
-
+	
 	li $t0,0
-	la $t2,buffer 				#posizione nel buffer temp
-	la $t1,bufferTemp
+	la $t1,buffer 				#posizione nel buffer temp
+	la $t2,bufferTemp
 	
 cicloripristinainv:
 
@@ -513,7 +514,7 @@ cicloripristinainv:
 	addi $t2, $t2, 1
 	lb $t3,($t2)
 	sb $t3,($t1)
-	ble $t0,127,cicloripristinainv
+	ble $t0,126,cicloripristinainv
 	
 	lw $t0, 0($sp)
 	lw $s0, 4($sp)
