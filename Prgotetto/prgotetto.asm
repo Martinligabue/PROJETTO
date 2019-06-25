@@ -219,11 +219,13 @@ scarica: 					# inverte il testo originale della frase
 algoritmoE:
 
 salvaStack:
+
 	subi $sp,$sp,12
 	sw $t0,0($sp)
 	sw $s0,4($sp)
 	sw $s1,8($sp)
 	move $s3,$s0 				#imposta a $s3 la lunghezza di buffer
+	
 resetValori:
 
 	li $t0,0
@@ -327,14 +329,14 @@ ripristinaStack:
 	la $t1,buffer 				#posizione nel buffer temp
 	la $t2,bufferTemp
 
-ciclorirpristina:
+cicloripristina:			#copia nel buffer
 
 	addi $t0, $t0, 1
 	addi $t1, $t1, 1
 	addi $t2, $t2, 1
 	lb $t3,($t2)
 	sb $t3,($t1)
-	ble $t0,127,ciclorirpristina
+	ble $t0,127,cicloripristina
 
 	lw $t0, 0($sp)
 	lw $s0, 4($sp)
@@ -407,85 +409,175 @@ cicloinvC:
 
 invertialgoritmoD:
 
-move $t7, $t0
-la $t0,buffer			 	#possiamo sovrascrivere t0
+	move $t7, $t0
+	la $t0,buffer			 		#possiamo sovrascrivere t0
 
 caricainv: 					#salva il testo nelllo stack
 
-lb $t1,($t0)
-addi $sp,$sp,-4 	 		# crea spazio per 1 words nello stack frame partendo dalla posizione -4
-sw $t1,0($sp)
-addi $t0,$t0,1
-bne $t1,$zero,caricainv 			# carica ogni byte del testo origionale nello stack
+	lb $t1,($t0)
+	addi $sp,$sp,-4 	 			# crea spazio per 1 words nello stack frame partendo dalla posizione -4
+	sw $t1,0($sp)
+	addi $t0,$t0,1
+	bne $t1,$zero,caricainv 			# carica ogni byte del testo origionale nello stack
 
-la $t0, buffer				#carica l'indirizzo del testo originale in t0
-addi $t0,$t0,-1
+	la $t0, buffer					#carica l'indirizzo del testo originale in t0
+	addi $t0,$t0,-1
 
 scaricainv: 					# inverte il testo originale della frase
 
-addi $sp,$sp,4
-sb $t1,($t0) 				#carica l'indirizzo del primo byte di t1 in t0
-addi $t0,$t0,1 				#somma ogni bayte di t0(t1) di per poi caricarli ed invertirli successivamente
-lw $t1,0($sp)				#prende il valore proveniente dallo stack
-bne $t1,$zero,scaricainv 			#controlla se il contore e' arrivato alla posozione finale
+	addi $sp,$sp,4
+	sb $t1,($t0) 					#carica l'indirizzo del primo byte di t1 in t0
+	addi $t0,$t0,1 					#somma ogni bayte di t0(t1) di per poi caricarli ed invertirli successivamente
+	lw $t1,0($sp)					#prende il valore proveniente dallo stack
+	bne $t1,$zero,scaricainv 			#controlla se il contore e' arrivato alla posozione finale
 
 	j exitinvertito
 
 invertialgoritmoE:
-	#inverti e
-	j exitinvertito
+
+salvaStackinv:
+
+	subi $sp,$sp,12
+	sw $t0,0($sp)
+	sw $s0,4($sp)
+	sw $s1,8($sp)
+	move $s3,$s0 				#imposta a $s3 la lunghezza di buffer
+
+resetValoriinv:
+
+	li $t0,0
+	li $s0,0
+	li $s1,0
+
+	la $s0, buffer
+
+salvaletterainv:				#ciclo grande, da cambiare di nome
+
+	lb $s1,($s0)				#salviamo in s1 la lettera
+	addi $s0,$s0,1
+	lb $t0,($s0)
+	bne $t0,'-',exitE
+	addi $s0,$s0,1
+
+	j leggesalvanumeroinv
+
+leggesalvanumeroinv:
+
+	lb $s2,($s0)				#salviamo in s2 il primo numero
+	subi $s2,$s2,48
+
+	j controllonumeroinv
+
+controllonumeroinv:
+
+	addi $s0,$s0,1
+	lb $t0,($s0)
+	beq $t0,'-',convertepriminv
+	beq $t0,' ',convertesecinv
+	beq $t0,0,convertesecinv
+	subi $t0,$t0,48
+	move $t2,$t0
+	mul $s2,$s2,10
+	add $s2,$s2,$t2
+
+	j controllonumeroinv
+
+convertepriminv:
+
+	la $t1, bufferTemp 			#salviamo in t1 il buffer per poterci salvare la roba dentro
+	add $t1,$t1,$s2
+	sb $s1,($t1)
+	addi $s0,$s0,1
+
+	j leggesalvanumeroinv
+
+convertesecinv:
+
+	la $t1,bufferTemp 			#salviamo in t1 il buffer per poterci salvare la roba dentro
+	add $t1,$t1,$s2
+	sb $s1,($t1)
+	addi $s0,$s0,1
+
+	j salvaletterainv
+
+exitE:
+
+	li $t0,0
+	la $t2,buffer 				#posizione nel buffer temp
+	la $t1,bufferTemp
+	
+cicloripristinainv:
+
+	addi $t0, $t0, 1
+	addi $t1, $t1, 1
+	addi $t2, $t2, 1
+	lb $t3,($t2)
+	sb $t3,($t1)
+	ble $t0,127,cicloripristinainv
+	
+	lw $t0, 0($sp)
+	lw $s0, 4($sp)
+	lw $s1, 8($sp)
+	addi $sp, $sp, 12
+
+	addi $t0,$t0,1
+	subi $s1, $s1, 1
+
+	j invertialgoritmi
 
 stampacriptato:
 
-	li	$v0, 13							# Open File Syscall
-	la	$a0, filecifr				# Load File Name
+	li $v0, 13				# Open File Syscall
+	la $a0, filecifr			# Load File Name
+	li $a1, 1
+	li $a2, 0
+	syscall
+
+	move $t1, $v0				# Save File Descriptor
+
+	li $v0, 15				# Write File Syscall
+	move $a0, $t1				#  = $a0, $t1    	# Load File Descriptor
+	la $a1, buffer				# Load Buffer Address
+	li $a2, 128				# Buffer Size
+	syscall
+
+
+
+	li $v0, 16				# Close File Syscall
+	move $a0, $t6				# Load File Descriptor
+	syscall
+	
+	li $v0, 16				# Close File Syscall
+	move $a0, $t1				# Load File Descriptor
+	syscall
+	
+	j preinverti
+
+stampadecriptato:
+
+	li $v0, 13				# Open File Syscall
+	la $a0, filedecifr			# Load File Name
 	li  $a1, 1
 	li  $a2, 0
 	syscall
 
-	move	$t1, $v0	# Save File Descriptor
+	move $t1, $v0				# Save File Descriptor
 
-	li		$v0, 15		# W		ite File Syscall
-	move 	$a0, $t1		#  = $a0, $t1    	# Load File Descriptor
-	la		$a1, buffer	# L		ad Buffer Address
-	li		$a2, 128	# Buf		er Size
+	li $v0, 15				# Write File Syscall
+	move $a0, $t1				#  = $a0, $t1    	# Load File Descriptor
+	la $a1, buffer				# Load Buffer Address
+	li $a2, 128				# Buf		er Size
 	syscall
 
-# Close File
-
-	li		$v0, 16		# Close File Syscall
-	move	$a0, $t6	# Load File Descriptor
+	li $v0, 16				# Close File Syscall
+	move $a0, $t6				# Load File Descriptor
 	syscall
-	li		$v0, 16		# Close File Syscall
-	move	$a0, $t1	# Load File Descriptor
+	
+	li $v0, 16				# Close File Syscall
+	move $a0, $t1				# Load File Descriptor
 	syscall
-	j	invertialgoritmi
-		# Goto End
-stampadecriptato:
-
-			li	$v0, 13							# Open File Syscall
-			la	$a0, filedecifr				# Load File Name
-			li  $a1, 1
-			li  $a2, 0
-			syscall
-
-			move	$t1, $v0	# Save File Descriptor
-
-			li		$v0, 15		# W		ite File Syscall
-			move 	$a0, $t1		#  = $a0, $t1    	# Load File Descriptor
-			la		$a1, buffer	# L		ad Buffer Address
-			li		$a2, 128	# Buf		er Size
-			syscall
-
-		# Close File
-
-			li	$v0, 16		# Close File Syscall
-			move	$a0, $t6	# Load File Descriptor
-			syscall
-			li	$v0, 16		# Close File Syscall
-			move	$a0, $t1	# Load File Descriptor
-			syscall
-			j	fine##aaaa
+	
+	j fine					##aaaa
 
 uscita:
 
@@ -495,8 +587,9 @@ uscita:
 exit:
 
 	move $t0, $t7
-	addi $t0,$t0,1
+	addi $t0,$t0, 1
 	subi $s1, $s1, 1
+	
 	j sceltaalgoritmo
 
 exitinvertito:
