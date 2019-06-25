@@ -225,7 +225,7 @@ salvaStack:
 	sw $s0,4($sp)
 	sw $s1,8($sp)
 	move $s3,$s0 				#imposta a $s3 la lunghezza di buffer
-	
+
 resetValori:
 
 	li $t0,0
@@ -275,7 +275,7 @@ controllosx:
 
 salvalettera:
 
-	li $t3,0 				#$t3 diventa una variabile numerica uguale a 0 (non e' piu' un indirizzo)
+	
 	sb $t1, ($s2) 				#si carica la lettera non doppia nello space
 	addi $s2,$s2,1				#si aumenta lo space per passare alla prossima posizione
 	move $t5,$s1 				#$t5 diventa il contatore che verra' utilizzato in controllo a dx per non modificare $s1 e poterlo riutilizzare
@@ -328,7 +328,8 @@ ripristinaStack:
 	li $t0,0
 	la $t1,buffer 				#posizione nel buffer temp
 	la $t2,bufferTemp
-
+	addi $t2, $t2, 1
+	
 cicloripristina:			#copia nel buffer
 
 	addi $t0, $t0, 1
@@ -434,10 +435,9 @@ scaricainv: 					# inverte il testo originale della frase
 	j exitinvertito
 
 invertialgoritmoE:
-
 salvaStackinv:
 
-	subi $sp,$sp,12
+	subi $sp,$sp,16
 	sw $t0,0($sp)
 	sw $s0,4($sp)
 	sw $s1,8($sp)
@@ -448,10 +448,11 @@ resetValoriinv:
 	li $t0,0
 	li $s0,0
 	li $s1,0
+	li $s3,0
 
 	la $s0, buffer
-	addi $s0, $s0, 1
-	
+
+
 salvaletterainv:				#ciclo grande, da cambiare di nome
 
 	lb $s1,($s0)				#salviamo in s1 la lettera
@@ -481,10 +482,27 @@ controllonumeroinv:
 	mul $s2,$s2,10
 	add $s2,$s2,$t2
 
+	
 	j controllonumeroinv
+	
+uguaglia1:
+
+	move $s3, $s2
+
+	j f
+	
+uguaglia2:
+
+	move $s3, $s2
+
+	j f2
 
 convertepriminv:
-
+	
+	bge $s2, $s3, uguaglia1
+				              	#t1 piu piccolo di s2?
+f:
+	                                     	#t1 uguale a s2
 	la $t1, bufferTemp 			#salviamo in t1 il buffer per poterci salvare la roba dentro
 	add $t1,$t1,$s2
 	sb $s1,($t1)
@@ -493,7 +511,11 @@ convertepriminv:
 	j leggesalvanumeroinv
 
 convertesecinv:
+	
+	bge $s2, $s3, uguaglia2
 
+f2:
+	
 	la $t1,bufferTemp 			#salviamo in t1 il buffer per poterci salvare la roba dentro
 	add $t1,$t1,$s2
 	sb $s1,($t1)
@@ -503,25 +525,47 @@ convertesecinv:
 
 exitE:
 	
-	li $t0,0
+	#li $s7,0
+	li $t0, 0
 	la $t1,buffer 				#posizione nel buffer temp
 	la $t2,bufferTemp
 	
 cicloripristinainv:
-
+	
 	addi $t0, $t0, 1
 	addi $t1, $t1, 1
 	addi $t2, $t2, 1
+	#beq $t0, $s3, resetta
 	lb $t3,($t2)
 	sb $t3,($t1)
-	ble $t0,126,cicloripristinainv
+	bgt $s3, $t0, cicloripristinainv
 	
+#resetta:
+
+	#move $t8, $t1
+	#sb $s7, ($t8)
+	
+	
+	#j cicloripristinainv	
+	
+pulibuffer:
+
+	li $t2, 0
+	addi $t0, $t0, 1
+	bge $t0,126, vaigiu
+	addi $t1, $t1, 1
+	sb $t2, ($t1)
+	
+	j pulibuffer
+	
+vaigiu:	
+
 	lw $t0, 0($sp)
 	lw $s0, 4($sp)
 	lw $s1, 8($sp)
 	addi $sp, $sp, 12
 
-	addi $t0,$t0,1
+	subi $t0,$t0,1
 	subi $s7, $s7, 1
 
 	j invertialgoritmi
@@ -547,11 +591,11 @@ stampacriptato:
 	li $v0, 16				# Close File Syscall
 	move $a0, $t6				# Load File Descriptor
 	syscall
-	
+
 	li $v0, 16				# Close File Syscall
 	move $a0, $t1				# Load File Descriptor
 	syscall
-	
+
 	j preinverti
 
 stampadecriptato:
@@ -573,11 +617,11 @@ stampadecriptato:
 	li $v0, 16				# Close File Syscall
 	move $a0, $t6				# Load File Descriptor
 	syscall
-	
+
 	li $v0, 16				# Close File Syscall
 	move $a0, $t1				# Load File Descriptor
 	syscall
-	
+
 	j fine					##aaaa
 
 uscita:
@@ -586,11 +630,11 @@ uscita:
 	syscall
 
 exit:
-
+	
 	move $t0, $t7
 	addi $t0,$t0, 1
 	subi $s1, $s1, 1
-	
+
 	j sceltaalgoritmo
 
 exitinvertito:
