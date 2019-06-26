@@ -8,7 +8,7 @@ filedecifr: .asciiz "messaggioDecifrato.txt"
 filecifr: .asciiz "messaggioCifrato.txt"
 buffer: .space 128
 buffer2: .space 4
-bufferTemp: .space 128
+bufferTemp: .space 256
 
 .text
 main:
