@@ -1,3 +1,7 @@
+#	codice creato e scritto e fatto e altri sinonimi da martin ricca fra tizio e l'altro
+#	e il loro indirizzo emaiul
+# 26 6 19
+
 .data
 
 testoerrorealgoritmo: .asciiz "e' stato inserito una chiave non corretto"
@@ -349,8 +353,6 @@ cicloripristina:			#copia nel buffer
 
 	j sceltaalgoritmo
 
-################################################################################
-
 invertialgoritmoA:
 
 	move $t7, $t0
@@ -500,7 +502,7 @@ uguaglia2:
 convertepriminv:
 
 	bge $s2, $s3, uguaglia1
-				              	#t1 piu piccolo di s2?
+
 f:
 	                                     	#t1 uguale a s2
 	la $t1, bufferTemp 			#salviamo in t1 il buffer per poterci salvare la roba dentro
@@ -525,7 +527,6 @@ f2:
 
 exitE:
 
-	#li $s7,0
 	li $t0, 0
 	la $t1,buffer 				#reset di t1 all'indirizzo del buffer temp
 	la $t2,bufferTemp
@@ -535,18 +536,9 @@ cicloripristinainv:
 	addi $t0, $t0, 1
 	addi $t1, $t1, 1
 	addi $t2, $t2, 1
-	#beq $t0, $s3, resetta
 	lb $t3,($t2)
 	sb $t3,($t1)
 	bgt $s3, $t0, cicloripristinainv	#copia solo fino la parte contenente effettivamente il testo
-
-#resetta:
-
-	#move $t8, $t1
-	#sb $s7, ($t8)
-
-
-	#j cicloripristinainv
 
 pulibuffer:
 
@@ -609,9 +601,9 @@ stampadecriptato:
 	move $t1, $v0				# Save File Descriptor
 
 	li $v0, 15				# Write File Syscall
-	move $a0, $t1				#  = $a0, $t1    	# Load File Descriptor
+	move $a0, $t1			  	# Load File Descriptor
 	la $a1, buffer				# Load Buffer Address
-	li $a2, 128				# Buf		er Size
+	li $a2, 128				# Buffer Size
 	syscall
 
 	li $v0, 16				# Close File Syscall
@@ -622,17 +614,15 @@ stampadecriptato:
 	move $a0, $t1				# Load File Descriptor
 	syscall
 
-	j fine					##aaaa
+	j fine
 
 uscita:
 
-	#li $v0, 10
-	#syscall
 	jr $ra
 
 exit:
 
-	move $t0, $t7
+	move $t0, $t7			#esce dall'algoritmo
 	addi $t0,$t0, 1
 	addi $s1, $s1, -1
 
@@ -640,7 +630,7 @@ exit:
 
 exitinvertito:
 
-	move $t0, $t7
+	move $t0, $t7			#esce dall'algoritmo invertito
 	addi $t0, $t0, -1
 	addi $s7, $s7, -1
 
@@ -654,6 +644,4 @@ errore:
 
 fine:
 
-	#li $v0, 10
-	#syscall
 	jr $ra
