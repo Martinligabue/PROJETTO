@@ -626,8 +626,7 @@ stampadecriptato:
 
 uscita:
 
-	li $v0, 10
-	syscall
+	jr $ra
 
 exit:
 
