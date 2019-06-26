@@ -11,13 +11,13 @@ buffer2: .space 4
 bufferTemp: .space 128
 
 .text
-
+main:
 open:						#dobbiamo inserire il caso di errore
 
 	li $v0, 13				# apriamo il file
-	la $a0, filein				# nome file
-	la $a1, 0				# legge e basta
-	la $a2, 0				# ignorato
+	la $a0, filein		# nome file
+	la $a1, 0					# legge e basta
+	la $a2, 0					# ignorato
 	syscall
 
 	move $t0, $v0				# salvimo in t0 il descrittore del file
@@ -131,7 +131,7 @@ invertialgoritmi:
 	beq $t2, 'D', invertialgoritmoD
 	beq $t2, 'E', invertialgoritmoE
 
-	subi $t0, $t0, 1
+	addi $t0, $t0, -1
 
 	j invertialgoritmi
 
@@ -220,7 +220,7 @@ algoritmoE:
 
 salvaStack:
 
-	subi $sp,$sp,12
+	addi $sp,$sp,-12
 	sw $t0,0($sp)
 	sw $s0,4($sp)
 	sw $s1,8($sp)
@@ -275,7 +275,7 @@ controllosx:
 
 salvalettera:
 
-	
+
 	sb $t1, ($s2) 				#si carica la lettera non doppia nello space
 	addi $s2,$s2,1				#si aumenta lo space per passare alla prossima posizione
 	move $t5,$s1 				#$t5 diventa il contatore che verra' utilizzato in controllo a dx per non modificare $s1 e poterlo riutilizzare
@@ -302,7 +302,7 @@ scriviposizione:
 
 ciclonumero:
 
-	subi $sp,$sp, 4 			#apre uno stack
+	addi $sp,$sp, -4 			#apre uno stack
 	addi $t9,$t9,1
 	li $s5,10
 	div $s6, $s5
@@ -314,7 +314,7 @@ ciclonumero:
 
 caricaNumero:
 
-	subi $t9,$t9,1
+	addi $t9,$t9,-1
 	lw $t3,0($sp)
 	addi $sp,$sp,4
 	addi $t3,$t3,48
@@ -329,7 +329,7 @@ ripristinaStack:
 	la $t1,buffer 				#posizione nel buffer temp
 	la $t2,bufferTemp
 	addi $t2, $t2, 1
-	
+
 cicloripristina:			#copia nel buffer
 
 	addi $t0, $t0, 1
@@ -345,7 +345,7 @@ cicloripristina:			#copia nel buffer
 	addi $sp, $sp, 12
 
 	addi $t0,$t0,1
-	subi $s1, $s1, 1
+	addi $s1, $s1, -1
 
 	j sceltaalgoritmo
 
@@ -361,7 +361,7 @@ cicloinvA:
 
 	lb $t3, ($t0)
 	beq $t3, 0, exitinvertito
-	subi $t2, $t3, 4			#toglie 4 posizioni all'ascii
+	addi $t2, $t3, -4			#toglie 4 posizioni all'ascii
 	addi $t2, $t2, 256			#aggiunge 256 per evitare l'underflow in caso di file danneggiato
 	div $t2, $t4
 	mfhi $t2
@@ -381,7 +381,7 @@ cicloinvB:
 
 	lb $t3, ($t0)
 	beq $t3, 0, exitinvertito
-	subi $t2, $t3, 4			#toglie 4 posizioni all'ascii
+	addi $t2, $t3, -4			#toglie 4 posizioni all'ascii
 	div $t2, $t4
 	mfhi $t2
 	sb $t2, ($t0)				#imposta la lettera nella posizione di memoria del primo byte
@@ -399,7 +399,7 @@ cicloinvC:
 
 	lb $t3, ($t0)
 	beq $t3, 0, exitinvertito
-	subi $t2, $t3, 4			#toglie 4 posizioni all'ascii
+	addi $t2, $t3, -4			#toglie 4 posizioni all'ascii
 	div $t2, $t4
 	mfhi $t2
 	sb $t2, ($t0)				#imposta la lettera nella posizione di memoria del primo byte
@@ -437,7 +437,7 @@ scaricainv: 					# inverte il testo originale della frase
 invertialgoritmoE:
 salvaStackinv:
 
-	subi $sp,$sp,16
+	addi $sp,$sp,-16
 	sw $t0,0($sp)
 	sw $s0,4($sp)
 	sw $s1,8($sp)
@@ -466,7 +466,7 @@ salvaletterainv:				#ciclo grande, da cambiare di nome
 leggesalvanumeroinv:
 
 	lb $s2,($s0)				#salviamo in s2 il primo numero
-	subi $s2,$s2,48
+	addi $s2,$s2,-48
 
 	j controllonumeroinv
 
@@ -477,20 +477,20 @@ controllonumeroinv:
 	beq $t0,'-',convertepriminv
 	beq $t0,' ',convertesecinv
 	beq $t0,0,convertesecinv
-	subi $t0,$t0,48
+	addi $t0,$t0,-48
 	move $t2,$t0
 	mul $s2,$s2,10
 	add $s2,$s2,$t2
 
-	
+
 	j controllonumeroinv
-	
+
 uguaglia1:
 
 	move $s3, $s2
 
 	j f
-	
+
 uguaglia2:
 
 	move $s3, $s2
@@ -498,7 +498,7 @@ uguaglia2:
 	j f2
 
 convertepriminv:
-	
+
 	bge $s2, $s3, uguaglia1
 				              	#t1 piu piccolo di s2?
 f:
@@ -511,11 +511,11 @@ f:
 	j leggesalvanumeroinv
 
 convertesecinv:
-	
+
 	bge $s2, $s3, uguaglia2
 
 f2:
-	
+
 	la $t1,bufferTemp 			#salviamo in t1 il buffer per poterci salvare la roba dentro
 	add $t1,$t1,$s2
 	sb $s1,($t1)
@@ -524,14 +524,14 @@ f2:
 	j salvaletterainv
 
 exitE:
-	
+
 	#li $s7,0
 	li $t0, 0
 	la $t1,buffer 				#posizione nel buffer temp
 	la $t2,bufferTemp
-	
+
 cicloripristinainv:
-	
+
 	addi $t0, $t0, 1
 	addi $t1, $t1, 1
 	addi $t2, $t2, 1
@@ -539,15 +539,15 @@ cicloripristinainv:
 	lb $t3,($t2)
 	sb $t3,($t1)
 	bgt $s3, $t0, cicloripristinainv
-	
+
 #resetta:
 
 	#move $t8, $t1
 	#sb $s7, ($t8)
-	
-	
-	#j cicloripristinainv	
-	
+
+
+	#j cicloripristinainv
+
 pulibuffer:
 
 	li $t2, 0
@@ -555,18 +555,18 @@ pulibuffer:
 	bge $t0,126, vaigiu
 	addi $t1, $t1, 1
 	sb $t2, ($t1)
-	
+
 	j pulibuffer
-	
-vaigiu:	
+
+vaigiu:
 
 	lw $t0, 0($sp)
 	lw $s0, 4($sp)
 	lw $s1, 8($sp)
 	addi $sp, $sp, 12
 
-	subi $t0,$t0,1
-	subi $s7, $s7, 1
+	addi $t0,$t0,-1
+	addi $s7, $s7, -1
 
 	j invertialgoritmi
 
@@ -630,10 +630,10 @@ uscita:
 	syscall
 
 exit:
-	
+
 	move $t0, $t7
 	addi $t0,$t0, 1
-	subi $s1, $s1, 1
+	addi $s1, $s1, -1
 
 	j sceltaalgoritmo
 
@@ -641,7 +641,7 @@ exitinvertito:
 
 	move $t0, $t7
 	addi $t0, $t0, -1
-	subi $s7, $s7, 1
+	addi $s7, $s7, -1
 
 	j invertialgoritmi
 
