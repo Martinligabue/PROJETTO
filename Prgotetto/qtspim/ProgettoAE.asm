@@ -1,6 +1,5 @@
-#	codice creato e scritto e fatto e altri sinonimi da martin ricca fra tizio e l'altro
-#	e il loro indirizzo emaiul
-# 26 6 19
+#	Autori: Ligabue Martin martin.ligabue@stud.unifi.it, Zamporlini Riccardo riccardo.zamporlini@stud.unifi.it, Aldinucci Gianmarco gianmarco.aldinucci@stud.unifi.it, Ruci Ledion ledion.ruci@stud.unifi.it
+# Data di consegna: 26/06/2019
 
 .data
 
