@@ -11,8 +11,8 @@ buffer2: .space 4
 bufferTemp: .space 256
 
 .text
-main:
-open:						#dobbiamo inserire il caso di errore
+main:						#per compatibilita' di qtspim
+open:						#apertura file
 
 	li $v0, 13				# apriamo il file
 	la $a0, filein		# nome file
@@ -45,9 +45,9 @@ lunghezzabuffer:
 
 
 	lb $t2, ($t0)
-	bge $t1, 128, openK
-	beq $t2, 0, openK
-	addi $t1, $t1, 1
+	bge $t1, 128, openK		#fa il ciclo finche' non si riempe il buffer
+	beq $t2, 0, openK			#fa il ciclo finche' non finisce il testo
+	addi $t1, $t1, 1			#contatore
 	addi $t0, $t0, 1
 
 	j lunghezzabuffer
@@ -56,9 +56,9 @@ openK:
 
 	move $s0, $t1
 	li $v0, 13				# apriamo il file chiave
-	la $a0, chiave				# nome file chiave
-	la $a1, 0				# legge e basta
-	la $a2, 0				# ignorato
+	la $a0, chiave		# nome file chiave
+	la $a1, 0					# legge e basta
+	la $a2, 0					# ignorato
 	syscall
 
 	move $t1, $v0				# salvimo in t0 il descrittore del file chiave
@@ -87,7 +87,7 @@ lunghezzabuffer2:
 
 
 	lb $t2, ($t0)
-	bge $t1, 128, dopo
+	bge $t1, 128, dopo		#come prima ma con il file chiave.txt
 	beq $t2, 0, dopo
 	addi $t1, $t1, 1
 	addi $t0, $t0, 1
@@ -100,10 +100,10 @@ dopo:
 	move $s7, $t1
 	la $t0, buffer2
 
-sceltaalgoritmo:
+sceltaalgoritmo:			#scorre il buffer contenente le chiavi carattere per carattere
 
 	lb $t2, ($t0)
-	ble $s1, 0, stampacriptato			#bisogna mettere algoritmi inverso
+	ble $s1, 0, stampacriptato
 	beq $t2, 'A', algoritmoA
 	beq $t2, 'B', algoritmoB
 	beq $t2, 'C', algoritmoC
@@ -119,9 +119,9 @@ sceltaalgoritmo:
 preinverti:
 
 	la $t0, buffer2				#salvo in $t0 il testo chiave e lo faccio partire dall'ultimo carattere
-	addi $t0, $t0, 4
+	addi $t0, $t0, 4			#parte dal 4 carattere, per poi tornare indietro nel ciclo successivo
 
-invertialgoritmi:
+invertialgoritmi:					#scorre il buffer contenente le chiavi in ordine inverso carattere per carattere
 
 	lb $t2, ($t0)
 	ble $s7, 0, stampadecriptato			#da impostare il metodo fine per far terminare il programma
@@ -137,7 +137,7 @@ invertialgoritmi:
 
 algoritmoA:
 
-	move $t7, $t0
+	move $t7, $t0					#salva il valore di t0 in t7, per ripristinarlo in seguito
 	la $t0, buffer			 	#possiamo sovrascrivere t0
 
 cicloA:						#	stampa il carattere aumentato di 4
@@ -145,9 +145,9 @@ cicloA:						#	stampa il carattere aumentato di 4
 	lb $t3,($t0)
 	beq $t3,0,exit
 	addi $t2,$t3,4
-	li $t3,256				#t3 non ci serve piu'
+	li $t3,256				#ci serve il valore 256
 	div $t2,$t3				#per evitare overflow
-	mfhi $t2
+	mfhi $t2					#prende il numero senza overflow
 	sb $t2,($t0) 				#imposta il carattere  nella posizione di memoria del primo byte
 	add $t0,$t0,1 				#incrementa il contatore
 
@@ -157,18 +157,18 @@ algoritmoB:
 
 	move $t7, $t0
 	la $t0,buffer			 	#possiamo sovrascrivere t0
-	addi $t0, $t0, 1
+	addi $t0, $t0, 1		#per partire dal secondo carattere
 
 cicloB:
 
 	lb $t3,($t0)
 	beq $t3,0,exit
 	addi $t2,$t3,4
-	li $t3,256				#t3 non ci serve piu'
-	div $t2,$t3				#per evitare overflow
+	li $t3,256					#t3 non ci serve piu'
+	div $t2,$t3					#per evitare overflow
 	mfhi $t2
-	sb $t2,($t0) 				#imposta il carattere  nella posizione di memoria del primo byte
-	add $t0,$t0,2				#incrementa il contatore
+	sb $t2,($t0) 				#imposta il carattere nella posizione di memoria del primo byte
+	add $t0,$t0,2				#incrementa il contatore di due
 
 	j cicloB
 
@@ -193,9 +193,9 @@ cicloC:
 algoritmoD:
 
 	move $t7, $t0
-	la $t0,buffer			 	#possiamo sovrascrivere t0
+	la $t0, buffer			 	#possiamo sovrascrivere t0
 
-carica: 					#salva il testo nelllo stack
+carica: 					#salva il testo nello stack
 
 	lb $t1,($t0)
 	addi $sp,$sp,-4 	 		# crea spazio per 1 words nello stack frame partendo dalla posizione -4
@@ -527,7 +527,7 @@ exitE:
 
 	#li $s7,0
 	li $t0, 0
-	la $t1,buffer 				#posizione nel buffer temp
+	la $t1,buffer 				#reset di t1 all'indirizzo del buffer temp
 	la $t2,bufferTemp
 
 cicloripristinainv:
@@ -538,7 +538,7 @@ cicloripristinainv:
 	#beq $t0, $s3, resetta
 	lb $t3,($t2)
 	sb $t3,($t1)
-	bgt $s3, $t0, cicloripristinainv
+	bgt $s3, $t0, cicloripristinainv	#copia solo fino la parte contenente effettivamente il testo
 
 #resetta:
 
@@ -552,9 +552,9 @@ pulibuffer:
 
 	li $t2, 0
 	addi $t0, $t0, 1
-	bge $t0,126, vaigiu
+	bge $t0,126, vaigiu		#quando il buffer e' finito esce
 	addi $t1, $t1, 1
-	sb $t2, ($t1)
+	sb $t2, ($t1)					#pulisce le posizioni da s3 alla fine del buffer
 
 	j pulibuffer
 
@@ -626,8 +626,9 @@ stampadecriptato:
 
 uscita:
 
-	li $v0, 10
-	syscall
+	#li $v0, 10
+	#syscall
+	jr $ra
 
 exit:
 
@@ -653,5 +654,6 @@ errore:
 
 fine:
 
-	li $v0, 10
-	syscall
+	#li $v0, 10
+	#syscall
+	jr $ra
