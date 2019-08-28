@@ -128,7 +128,7 @@ invertialgoritmi:					#scorre il buffer contenente le chiavi in ordine inverso c
 
 	lb $t2, ($t0)
 	ble $s7, 0, stampadecriptato			#da impostare il metodo fine per far terminare il programma
-	beq $t2, 'A', invertialgoritmoA
+	beq $t2, 'A', invertialgoritmoA		#jal
 	beq $t2, 'B', invertialgoritmoB
 	beq $t2, 'C', invertialgoritmoC
 	beq $t2, 'D', invertialgoritmoD
