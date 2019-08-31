@@ -13,6 +13,23 @@ bufferTemp: .space 256
 .text
 main:
 	jal open
+
+		move $s1, $t1					#salvo in $s1 e $s7 la lunghezza del testo CHIAVE
+		move $s7, $t1
+		la $t0, buffer2
+
+		jal sceltaalgoritmo
+
+		la $t0, buffer2				#salvo in $t0 il testo chiave e lo faccio partire dall'ultimo carattere
+		addi $t0, $t0, 4			#parte dal 4 carattere, per poi tornare indietro nel ciclo successivo
+
+		jal invertialgoritmi
+
+
+
+
+	j fine
+
 open:						#apertura file
 
 	li $v0, 13				# apriamo il file
@@ -41,7 +58,7 @@ close:
   	li $t1, 0
 
   	la $t0, buffer
-		jr $ra;
+
 lunghezzabuffer:
 
 
@@ -94,12 +111,7 @@ lunghezzabuffer2:
 	addi $t0, $t0, 1
 
 	j lunghezzabuffer2
-
-dopo:
-
-	move $s1, $t1					#salvo in $s1 e $s7 la lunghezza del testo CHIAVE
-	move $s7, $t1
-	la $t0, buffer2
+	jr $ra;
 
 sceltaalgoritmo:			#scorre il buffer contenente le chiavi carattere per carattere
 
@@ -118,9 +130,8 @@ sceltaalgoritmo:			#scorre il buffer contenente le chiavi carattere per caratter
 	j uscita
 
 preinverti:
+	jr $ra
 
-	la $t0, buffer2				#salvo in $t0 il testo chiave e lo faccio partire dall'ultimo carattere
-	addi $t0, $t0, 4			#parte dal 4 carattere, per poi tornare indietro nel ciclo successivo
 
 invertialgoritmi:					#scorre il buffer contenente le chiavi in ordine inverso carattere per carattere
 
