@@ -26,7 +26,7 @@ open:						#apertura file
 	move $t0, $v0				# salvimo in t0 il descrittore del file
 	blt $v0, 0, errore
 
-read:
+read:								#jal
 
 	li $v0, 14				# legge file
 	move $a0, $t0

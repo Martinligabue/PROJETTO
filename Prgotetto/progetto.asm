@@ -1,29 +1,30 @@
 .data
 
-testoerrorealgoritmo: .asciiz "e' stato inserito un testo non corretto"
-testo: .asciiz "si e' presentato un errore"
+testoerrorealgoritmo: .asciiz "e' stato inserito una chiave non corretto"
+testo: .asciiz "si e' presentato un errore nell'apertra del file"
 filein: .asciiz "messaggio.txt"
 chiave: .asciiz "chiave.txt"
 filedecifr: .asciiz "messaggioDecifrato.txt"
 filecifr: .asciiz "messaggioCifrato.txt"
 buffer: .space 128
 buffer2: .space 4
-bufferTemp: .space 128
+bufferTemp: .space 256
 
 .text
-
-open:						#dobbiamo inserire il caso di errore
+main:
+	jal open
+open:						#apertura file
 
 	li $v0, 13				# apriamo il file
-	la $a0, filein				# nome file
-	la $a1, 0				# legge e basta
-	la $a2, 0				# ignorato
+	la $a0, filein		# nome file
+	la $a1, 0					# legge e basta
+	la $a2, 0					# ignorato
 	syscall
 
 	move $t0, $v0				# salvimo in t0 il descrittore del file
 	blt $v0, 0, errore
 
-read:
+read:								#jal
 
 	li $v0, 14				# legge file
 	move $a0, $t0
@@ -40,14 +41,14 @@ close:
   	li $t1, 0
 
   	la $t0, buffer
-
+		jr $ra;
 lunghezzabuffer:
 
 
 	lb $t2, ($t0)
-	bge $t1, 128, openK
-	beq $t2, 0, openK
-	addi $t1, $t1, 1
+	bge $t1, 128, openK		#fa il ciclo finche' non si riempe il buffer
+	beq $t2, 0, openK			#fa il ciclo finche' non finisce il testo
+	addi $t1, $t1, 1			#contatore
 	addi $t0, $t0, 1
 
 	j lunghezzabuffer
@@ -56,9 +57,9 @@ openK:
 
 	move $s0, $t1
 	li $v0, 13				# apriamo il file chiave
-	la $a0, chiave				# nome file chiave
-	la $a1, 0				# legge e basta
-	la $a2, 0				# ignorato
+	la $a0, chiave		# nome file chiave
+	la $a1, 0					# legge e basta
+	la $a2, 0					# ignorato
 	syscall
 
 	move $t1, $v0				# salvimo in t0 il descrittore del file chiave
@@ -87,7 +88,7 @@ lunghezzabuffer2:
 
 
 	lb $t2, ($t0)
-	bge $t1, 128, dopo
+	bge $t1, 128, dopo		#come prima ma con il file chiave.txt
 	beq $t2, 0, dopo
 	addi $t1, $t1, 1
 	addi $t0, $t0, 1
@@ -100,7 +101,7 @@ dopo:
 	move $s7, $t1
 	la $t0, buffer2
 
-sceltaalgoritmo:
+sceltaalgoritmo:			#scorre il buffer contenente le chiavi carattere per carattere
 
 	lb $t2, ($t0)
 	ble $s1, 0, stampacriptato
@@ -119,25 +120,25 @@ sceltaalgoritmo:
 preinverti:
 
 	la $t0, buffer2				#salvo in $t0 il testo chiave e lo faccio partire dall'ultimo carattere
-	addi $t0, $t0, 4
+	addi $t0, $t0, 4			#parte dal 4 carattere, per poi tornare indietro nel ciclo successivo
 
-invertialgoritmi:
+invertialgoritmi:					#scorre il buffer contenente le chiavi in ordine inverso carattere per carattere
 
 	lb $t2, ($t0)
-	ble $s7, 0, stampadecriptato
-	beq $t2, 'A', invertialgoritmoA
+	ble $s7, 0, stampadecriptato			#da impostare il metodo fine per far terminare il programma
+	beq $t2, 'A', invertialgoritmoA		#jal
 	beq $t2, 'B', invertialgoritmoB
 	beq $t2, 'C', invertialgoritmoC
 	beq $t2, 'D', invertialgoritmoD
 	beq $t2, 'E', invertialgoritmoE
 
-	subi $t0, $t0, 1
+	addi $t0, $t0, -1
 
 	j invertialgoritmi
 
 algoritmoA:
 
-	move $t7, $t0
+	move $t7, $t0					#salva il valore di t0 in t7, per ripristinarlo in seguito
 	la $t0, buffer			 	#possiamo sovrascrivere t0
 
 cicloA:						#	stampa il carattere aumentato di 4
@@ -145,9 +146,9 @@ cicloA:						#	stampa il carattere aumentato di 4
 	lb $t3,($t0)
 	beq $t3,0,exit
 	addi $t2,$t3,4
-	li $t3,256				#t3 non ci serve piu'
+	li $t3,256				#ci serve il valore 256
 	div $t2,$t3				#per evitare overflow
-	mfhi $t2
+	mfhi $t2					#prende il numero senza overflow
 	sb $t2,($t0) 				#imposta il carattere  nella posizione di memoria del primo byte
 	add $t0,$t0,1 				#incrementa il contatore
 
@@ -157,18 +158,18 @@ algoritmoB:
 
 	move $t7, $t0
 	la $t0,buffer			 	#possiamo sovrascrivere t0
-	addi $t0, $t0, 1
+	addi $t0, $t0, 1		#per partire dal secondo carattere
 
 cicloB:
 
 	lb $t3,($t0)
 	beq $t3,0,exit
 	addi $t2,$t3,4
-	li $t3,256				#t3 non ci serve piu'
-	div $t2,$t3				#per evitare overflow
+	li $t3,256					#t3 non ci serve piu'
+	div $t2,$t3					#per evitare overflow
 	mfhi $t2
-	sb $t2,($t0) 				#imposta il carattere  nella posizione di memoria del primo byte
-	add $t0,$t0,2				#incrementa il contatore
+	sb $t2,($t0) 				#imposta il carattere nella posizione di memoria del primo byte
+	add $t0,$t0,2				#incrementa il contatore di due
 
 	j cicloB
 
@@ -193,9 +194,9 @@ cicloC:
 algoritmoD:
 
 	move $t7, $t0
-	la $t0,buffer			 	#possiamo sovrascrivere t0
+	la $t0, buffer			 	#possiamo sovrascrivere t0
 
-carica: 					#salva il testo nelllo stack
+carica: 					#salva il testo nello stack
 
 	lb $t1,($t0)
 	addi $sp,$sp,-4 	 		# crea spazio per 1 words nello stack frame partendo dalla posizione -4
@@ -220,7 +221,7 @@ algoritmoE:
 
 salvaStack:
 
-	subi $sp,$sp,12
+	addi $sp,$sp,-12
 	sw $t0,0($sp)
 	sw $s0,4($sp)
 	sw $s1,8($sp)
@@ -302,7 +303,7 @@ scriviposizione:
 
 ciclonumero:
 
-	subi $sp,$sp, 4 			#apre uno stack
+	addi $sp,$sp, -4 			#apre uno stack
 	addi $t9,$t9,1
 	li $s5,10
 	div $s6, $s5
@@ -314,7 +315,7 @@ ciclonumero:
 
 caricaNumero:
 
-	subi $t9,$t9,1
+	addi $t9,$t9,-1
 	lw $t3,0($sp)
 	addi $sp,$sp,4
 	addi $t3,$t3,48
@@ -345,11 +346,9 @@ cicloripristina:			#copia nel buffer
 	addi $sp, $sp, 12
 
 	addi $t0,$t0,1
-	subi $s1, $s1, 1
+	addi $s1, $s1, -1
 
 	j sceltaalgoritmo
-
-################################################################################
 
 invertialgoritmoA:
 
@@ -361,7 +360,7 @@ cicloinvA:
 
 	lb $t3, ($t0)
 	beq $t3, 0, exitinvertito
-	subi $t2, $t3, 4			#toglie 4 posizioni all'ascii
+	addi $t2, $t3, -4			#toglie 4 posizioni all'ascii
 	addi $t2, $t2, 256			#aggiunge 256 per evitare l'underflow in caso di file danneggiato
 	div $t2, $t4
 	mfhi $t2
@@ -381,7 +380,7 @@ cicloinvB:
 
 	lb $t3, ($t0)
 	beq $t3, 0, exitinvertito
-	subi $t2, $t3, 4			#toglie 4 posizioni all'ascii
+	addi $t2, $t3, -4			#toglie 4 posizioni all'ascii
 	div $t2, $t4
 	mfhi $t2
 	sb $t2, ($t0)				#imposta la lettera nella posizione di memoria del primo byte
@@ -399,7 +398,7 @@ cicloinvC:
 
 	lb $t3, ($t0)
 	beq $t3, 0, exitinvertito
-	subi $t2, $t3, 4			#toglie 4 posizioni all'ascii
+	addi $t2, $t3, -4			#toglie 4 posizioni all'ascii
 	div $t2, $t4
 	mfhi $t2
 	sb $t2, ($t0)				#imposta la lettera nella posizione di memoria del primo byte
@@ -437,7 +436,7 @@ scaricainv: 					# inverte il testo originale della frase
 invertialgoritmoE:
 salvaStackinv:
 
-	subi $sp,$sp,16
+	addi $sp,$sp,-16
 	sw $t0,0($sp)
 	sw $s0,4($sp)
 	sw $s1,8($sp)
@@ -466,7 +465,7 @@ salvaletterainv:				#ciclo grande, da cambiare di nome
 leggesalvanumeroinv:
 
 	lb $s2,($s0)				#salviamo in s2 il primo numero
-	subi $s2,$s2,48
+	addi $s2,$s2,-48
 
 	j controllonumeroinv
 
@@ -477,7 +476,7 @@ controllonumeroinv:
 	beq $t0,'-',convertepriminv
 	beq $t0,' ',convertesecinv
 	beq $t0,0,convertesecinv
-	subi $t0,$t0,48
+	addi $t0,$t0,-48
 	move $t2,$t0
 	mul $s2,$s2,10
 	add $s2,$s2,$t2
@@ -500,7 +499,7 @@ uguaglia2:
 convertepriminv:
 
 	bge $s2, $s3, uguaglia1
-				              	#t1 piu piccolo di s2?
+
 f:
 	                                     	#t1 uguale a s2
 	la $t1, bufferTemp 			#salviamo in t1 il buffer per poterci salvare la roba dentro
@@ -526,7 +525,7 @@ f2:
 exitE:
 
 	li $t0, 0
-	la $t1,buffer 				#posizione nel buffer temp
+	la $t1,buffer 				#reset di t1 all'indirizzo del buffer temp
 	la $t2,bufferTemp
 
 cicloripristinainv:
@@ -536,17 +535,15 @@ cicloripristinainv:
 	addi $t2, $t2, 1
 	lb $t3,($t2)
 	sb $t3,($t1)
-	bgt $s3, $t0, cicloripristinainv
-
-
+	bgt $s3, $t0, cicloripristinainv	#copia solo fino la parte contenente effettivamente il testo
 
 pulibuffer:
 
 	li $t2, 0
 	addi $t0, $t0, 1
-	bge $t0,126, vaigiu
+	bge $t0,126, vaigiu		#quando il buffer e' finito esce
 	addi $t1, $t1, 1
-	sb $t2, ($t1)
+	sb $t2, ($t1)					#pulisce le posizioni da s3 alla fine del buffer
 
 	j pulibuffer
 
@@ -557,8 +554,8 @@ vaigiu:
 	lw $s1, 8($sp)
 	addi $sp, $sp, 12
 
-	subi $t0,$t0,1
-	subi $s7, $s7, 1
+	addi $t0,$t0,-1
+	addi $s7, $s7, -1
 
 	j invertialgoritmi
 
@@ -601,9 +598,9 @@ stampadecriptato:
 	move $t1, $v0				# Save File Descriptor
 
 	li $v0, 15				# Write File Syscall
-	move $a0, $t1				#  = $a0, $t1    	# Load File Descriptor
+	move $a0, $t1			  	# Load File Descriptor
 	la $a1, buffer				# Load Buffer Address
-	li $a2, 128				# Buf		er Size
+	li $a2, 128				# Buffer Size
 	syscall
 
 	li $v0, 16				# Close File Syscall
@@ -614,26 +611,25 @@ stampadecriptato:
 	move $a0, $t1				# Load File Descriptor
 	syscall
 
-	j fine					
+	j fine
 
 uscita:
 
-	li $v0, 10
-	syscall
+	jr $ra
 
 exit:
 
-	move $t0, $t7
+	move $t0, $t7			#esce dall'algoritmo
 	addi $t0,$t0, 1
-	subi $s1, $s1, 1
+	addi $s1, $s1, -1
 
 	j sceltaalgoritmo
 
 exitinvertito:
 
-	move $t0, $t7
+	move $t0, $t7			#esce dall'algoritmo invertito
 	addi $t0, $t0, -1
-	subi $s7, $s7, 1
+	addi $s7, $s7, -1
 
 	j invertialgoritmi
 
@@ -642,8 +638,8 @@ errore:
 	li $v0, 4
 	la $a0, testo
 	syscall
+	j fine
 
 fine:
 
-	li $v0, 10
-	syscall
+	jr $ra
