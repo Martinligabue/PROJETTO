@@ -1,7 +1,7 @@
 .data
 
 testoerrorealgoritmo: .asciiz "e' stata inserita una chiave non corretta"
-testo: .asciiz "si e' presentato un errore nell'apertura del file"
+eroreio: .asciiz "si e' presentato un errore nell'apertura del file"
 filein: .asciiz "messaggio.txt"
 chiave: .asciiz "chiave.txt"
 filedecifr: .asciiz "messaggioDecifrato.txt"
@@ -25,7 +25,6 @@ main:
 
 		jal invertialgoritmi
 
-
 		jal stampacriptato
 
 		j fine
@@ -39,9 +38,9 @@ open:						#apertura file
 	syscall
 
 	move $t0, $v0				# salvimo in t0 il descrittore del file
-	blt $v0, 0, errore
+	blt $v0, 0, errore	#quando il descrittore e' minore di 0 significa che si e' verificato un errore
 
-read:								#jal
+read:
 
 	li $v0, 14				# legge file
 	move $a0, $t0
@@ -51,8 +50,8 @@ read:								#jal
 
 close:
 
- 	li  $v0, 16
-  	move  $a0, $t0
+		li  $v0, 16
+		move  $a0, $t0
   	syscall
 
   	li $t1, 0
@@ -60,7 +59,6 @@ close:
   	la $t0, buffer
 
 lunghezzabuffer:
-
 
 	lb $t2, ($t0)
 	bge $t1, 128, openK		#fa il ciclo finche' non si riempe il buffer
@@ -129,9 +127,9 @@ sceltaalgoritmo:			#scorre il buffer contenente le chiavi carattere per caratter
 
 	j uscita
 
+	############################################################
 preinverti:
 	jr $ra
-############################################################
 
 invertialgoritmi:					#scorre il buffer contenente le chiavi in ordine inverso carattere per carattere
 
@@ -647,7 +645,7 @@ exitinvertito:
 errore:
 
 	li $v0, 4
-	la $a0, testo
+	la $a0, eroreio
 	syscall
 	j fine
 
