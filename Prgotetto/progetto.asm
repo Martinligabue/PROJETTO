@@ -27,7 +27,7 @@ main:
 
 		jal stampacriptato
 
-		j fine
+		j jrra
 ############################################################à
 open:						#apertura file
 
@@ -90,26 +90,22 @@ readK:
 
 closeK:
 
- 	 li  $v0, 16    			#
-	 move  $a0, $t1  		 	#
+ 	 li  $v0, 16
+	 move  $a0, $t1
 	 syscall
-
-
-
-	la $t0, buffer2
-	li $t1, 0
+	 la $t0, buffer2
+	 li $t1, 0
 
 lunghezzabuffer2:
 
-
 	lb $t2, ($t0)
-	bge $t1, 128, dopo		#come prima ma con il file chiave.txt
+	bge $t1, 128, jrra		#come prima ma con il file chiave.txt
 	beq $t2, 0, dopo
 	addi $t1, $t1, 1
 	addi $t0, $t0, 1
 
 	j lunghezzabuffer2
-	jr $ra;
+
 ############################################################
 sceltaalgoritmo:			#scorre il buffer contenente le chiavi carattere per carattere
 
@@ -125,7 +121,7 @@ sceltaalgoritmo:			#scorre il buffer contenente le chiavi carattere per caratter
 	la $a0, testoerrorealgoritmo
 	syscall
 
-	j uscita
+	j jrra
 
 	############################################################
 preinverti:
@@ -620,11 +616,8 @@ stampadecriptato:
 	move $a0, $t1				# Load File Descriptor
 	syscall
 
-	j fine
+	j jrra
 ############################################################
-uscita:
-
-	jr $ra
 
 exit:
 
@@ -647,8 +640,8 @@ errore:
 	li $v0, 4
 	la $a0, eroreio
 	syscall
-	j fine
-
-fine:
+	j jrra
 
 	jr $ra
+	jrra:
+		jr $ra
