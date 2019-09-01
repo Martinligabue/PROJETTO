@@ -218,7 +218,8 @@ scarica: 					# inverte il testo originale della frase
 	sb $t1,($t0) 				#carica l'indirizzo del primo byte di t1 in t0
 	addi $t0,$t0,1 				#somma ogni bayte di t0(t1) di per poi caricarli ed invertirli successivamente
 	lw $t1,0($sp)				#prende il valore proveniente dallo stack
-	bne $t1,$zero,scarica 			#controlla se il contore e' arrivato alla posozione finale
+	bne $t1,$zero,scarica 			#controlla se il contore e' arrivato alla posizione finale
+	##################aggiornare con indirizzo invece che zero
 
 	j exit
 
@@ -618,6 +619,16 @@ stampadecriptato:
 
 	j jrra
 ############################################################
+salvaStack: #228
+
+	addi $sp,$sp,-12
+	sw $t0,0($sp)
+	sw $s0,4($sp)
+	sw $s1,8($sp)
+
+ripristinaStack: ####??????
+	lw...
+	addi $sp,$sp,12
 
 exit:
 
