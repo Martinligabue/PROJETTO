@@ -581,5 +581,5 @@ scritturaFile:
 		la	$a0, fnf	# Load Error String
 		syscall
 
-jrra:#Metodo ausiliario per utilizzare il jrra nei beq
-jr $ra
+	jrra:#Metodo ausiliario per utilizzare il jr $ra nei beq
+		jr $ra
