@@ -18,7 +18,8 @@ main:
   sw $s0, 4($sp)    #e
   sw $s1, 8($sp)    #i
   jal letturaFiles  #registri
-
+  
+ 
   move $t8, $s0
   #s0 lunghezza file input
   move $s1, $v1 #in s1 lunghezza chiave
@@ -44,12 +45,12 @@ sceltaAlgoritmo:
   beq $t2, 'A', algoritmoA
   #beq $t2, 'B', algoritmoB
  # beq $t2, 'C', algoritmoC
- # beq $t2, 'D', algoritmoD
+  beq $t2, 'D', algoritmoD
  # beq $t2, 'E', algoritmoE
   #beq $t2, 'F', algoritmoAinv
   #beq $t2, 'G', algoritmoBinv
  # beq $t2, 'H', algoritmoCinv
-  #beq $t2, 'I', algoritmoD
+  beq $t2, 'I', algoritmoD
   #beq $t2, 'J', algoritmoEinv
 
   li $v0, 4
@@ -98,7 +99,7 @@ lunghezzabuffer:
 
   openK:
 
-  	move $s0, $t1
+  	
 
   	li $v0, 13				# apriamo il file chiave
   	la $a0, chiave		# nome file chiave
@@ -130,9 +131,10 @@ lunghezzabufferK:
 	lb $t2, ($t0)
 	bge $v1, 128, jrra		#come prima ma con il file chiave.txt
 	beq $t2, 0, jrra
-	addi $v1, $v1, 1 #in v2 c'e' la lunghezza della chiave
+	addi $v1, $v1, 1 #in v1 c'e' la lunghezza della chiave
 	addi $t0, $t0, 1
-
+	move $s0, $t1
+	
 	j lunghezzabufferK
 
   stampaCriptato:
@@ -206,7 +208,32 @@ lunghezzabufferK:
 
     	j cicloA
 
+algoritmoD:
+      
+      	la $t4, buffer			 	#possiamo sovrascrivere t0
 
+      carica: 					#salva il testo nello stack
+      
+      	lb $t1,($t4)
+        la $t5,($sp)
+      	addi $sp,$sp,-4 	 		# crea spazio per 1 words nello stack frame partendo dalla posizione -4
+      	sw $t1,0($sp)
+      	addi $t4,$t4,1
+      	bne $t1,$zero,carica 			# carica ogni byte del testo origionale nello stack
+      
+      	la $t4, buffer				#carica l'indirizzo del testo originale in t0
+      	addi $t4,$t4,-1
+      
+      scarica: 					# inverte il testo originale della frase
+      
+      	addi $sp,$sp,4
+      	sb $t1,($t4) 				#carica l'indirizzo del primo byte di t1 in t0
+      	addi $t4,$t4,1 				#somma ogni bayte di t0(t1) di per poi caricarli ed invertirli successivamente
+      	lw $t1,0($sp)				#prende il valore proveniente dallo stack
+        
+      	ble $t1,$t5,scarica 			#controlla se il contore e' arrivato alla posizione finale
+
+j sceltaAlgoritmo
 
 
 
