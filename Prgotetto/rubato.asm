@@ -200,14 +200,12 @@ algC:########################################################Capire e dividere
 
 	forStringaAlgC:	# Ciclo di tutti i caratteri della stringa
 		lb $t0, bufferMessage($t3)		# Carattere attuale da elaborare
-		beq $t0, $zero, fineForStringaAlgBC 	# Controllo fine della stringa e del ciclo
+		beq $t0, $zero, jrra 	# Controllo fine della stringa e del ciclo
 
 			li $t1, 0			# Indico che al prossimo ciclo dovra' essere applicato l'algoritmo
 			addi $t3, $t3, 1		# Incremento del contatore del buffer per passare ai valori successivi
 	j forStringaAlgC	# Iterazione successiva
 
-	fineForStringaAlgC:
-jr $ra			# Termine della procedura
 
 
 # Procedura che cifra/decifra una stringa con l'Algoritmo D
@@ -377,7 +375,7 @@ algDecifraturaE:
 
 
 	li $t1, 0	# Contatore del buffer della stringa
-  	li $s1, 32	# Valore ASCII dello spazio
+  li $s1, 32	# Valore ASCII dello spazio
 	li $s2, 45	# Valore ASCII del simbolo -
 
 
@@ -491,7 +489,7 @@ dimensioneBuffer:
 		addi $a0, $a0, 1
 	j forDimensioneBuffer
 
-	fineDimensioneBuffer:
+	fineDimensioneBuffer: #############si puo' migliorare? basta non usare t1, ez
 	move $v0, $t1
 jr $ra
 
@@ -575,7 +573,7 @@ scritturaFile:
 		li	$v0, 16		# Close File Syscall
 		move	$a0, $t4	# Load File Descriptor
 		syscall
-		j fineScrittura
+		j jrra
 
 	# Error
 	erroreWriteFile:
@@ -583,5 +581,5 @@ scritturaFile:
 		la	$a0, fnf	# Load Error String
 		syscall
 
-	fineScrittura:
-jr $ra # Termine della procedura
+jrra:#Metodo ausiliario per utilizzare il jrra nei beq
+jr $ra
