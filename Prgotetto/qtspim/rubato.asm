@@ -118,13 +118,13 @@ switch:################## modificato e compresso
 	SwitchAlgB:
 		mul $a0, $s2, 4	# Imposto se voglio cifrare o decifrare in base a quel che ho in $s2
 		li $a1, 0	# Imposto che voglio utilizzare l'algoritmo B
-		jal algBC	# Chiamo la procedura per cifrare o decifrare con algoritmo B
+		jal algB	# Chiamo la procedura per cifrare o decifrare con algoritmo B
 	j forStringaChiave	# Iterazione successiva
 
 	SwitchAlgC:
 		mul $a0, $s2, 4	# Imposto se voglio cifrare o decifrare in base a quel che ho in $s2
 		li $a1, 1	# Imposto che voglio utilizzare l'algoritmo C
-		jal algBC	# Chiamo la procedura per cifrare o decifrare con algoritmo C
+		jal algC	# Chiamo la procedura per cifrare o decifrare con algoritmo C
 	j forStringaChiave	# Iterazione successiva
 
 	SwitchAlgD:
@@ -140,15 +140,11 @@ switch:################## modificato e compresso
 	j forStringaChiave	# Iterazione successiva
 
 	FineSwitch:
-		lw $s2, 0($sp)		# Ripristino del vecchio $s2 dallo stack
-		addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
-		lw $s1, 0($sp)		# Ripristino del vecchio $s1 dallo stack
-		addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
-		lw $s0, 0($sp)		# Ripristino del vecchio $s0 dallo stack
-		addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
-
+		lw $s2, 12($sp)		# Ripristino del vecchio $s2 dallo stack
+		lw $s1, 8($sp)		# Ripristino del vecchio $s1 dallo stack
+		lw $s0, 4($sp)		# Ripristino del vecchio $s0 dallo stack
 		lw $ra, 0($sp)		# Ripristino del vecchio $ra dallo stack
-		addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
+		addi $sp, $sp, 16	# Risistemazione dello stack pointer dopo aver estratto un dato
 jr $ra
 
 
@@ -177,31 +173,40 @@ jr $ra			# Termine della procedura
 
 # Procedura che cifra/decifra una stringa con l'Algoritmo B o C in base al valore passato in $a0
 # $a1 = 0 -> algoritmo B, $a1 = 1 -> algoritmo C
-algBC:########################################################Capire e dividere
+algB:########################################################Capire e dividere
 	li $t3, 0	# Contatore del buffer della stringa
 	move $t1, $a1	# Flag per indicare se devo applicare algoritmo o no
 
-	forStringaAlgBC:	# Ciclo di tutti i caratteri della stringa
+	forStringaAlgB:	# Ciclo di tutti i caratteri della stringa
 		lb $t0, bufferMessage($t3)		# Carattere attuale da elaborare
-		beq $t0, $zero, fineForStringaAlgBC 	# Controllo fine della stringa e del ciclo
+		beq $t0, $zero, fineForStringaAlgB 	# Controllo fine della stringa e del ciclo
 
-		beq $t1, 0, applyAlgBC	# Controllo il flag per verificare se devo applicare l'algoritmo
-
-		doNotApplyAlgBC:
-			li $t1, 0			# Indico che al prossimo ciclo dovra' essere applicato l'algoritmo
-			j goAwayAlgBC
-
-		applyAlgBC:
+		applyAlgB:
 			add $t0, $t0, $a0		# Applico l'algoritmo sul carattere
 			sb $t0, bufferMessage($t3)	# Salvo il carattere cifrato
 			li $t1, 1			# Indico che al prossimo ciclo non dovra' essere applicato l'algoritmo
 
-		goAwayAlgBC:
 			addi $t3, $t3, 1		# Incremento del contatore del buffer per passare ai valori successivi
-	j forStringaAlgBC	# Iterazione successiva
+	j forStringaAlgB	# Iterazione successiva
 
-	fineForStringaAlgBC:
+	fineForStringaAlgB:
 jr $ra			# Termine della procedura
+
+# Procedura che cifra/decifra una stringa con l'Algoritmo B o C in base al valore passato in $a0
+# $a1 = 0 -> algoritmo B, $a1 = 1 -> algoritmo C
+algC:########################################################Capire e dividere
+	li $t3, 0	# Contatore del buffer della stringa
+	move $t1, $a1	# Flag per indicare se devo applicare algoritmo o no
+
+	forStringaAlgC:	# Ciclo di tutti i caratteri della stringa
+		lb $t0, bufferMessage($t3)		# Carattere attuale da elaborare
+		beq $t0, $zero, jrra 	# Controllo fine della stringa e del ciclo
+
+			li $t1, 0			# Indico che al prossimo ciclo dovra' essere applicato l'algoritmo
+			addi $t3, $t3, 1		# Incremento del contatore del buffer per passare ai valori successivi
+	j forStringaAlgC	# Iterazione successiva
+
+
 
 # Procedura che cifra/decifra una stringa con l'Algoritmo D
 algD:##############################################################Da rifare
@@ -370,7 +375,7 @@ algDecifraturaE:
 
 
 	li $t1, 0	# Contatore del buffer della stringa
-  	li $s1, 32	# Valore ASCII dello spazio
+  li $s1, 32	# Valore ASCII dello spazio
 	li $s2, 45	# Valore ASCII del simbolo -
 
 
@@ -484,7 +489,7 @@ dimensioneBuffer:
 		addi $a0, $a0, 1
 	j forDimensioneBuffer
 
-	fineDimensioneBuffer:
+	fineDimensioneBuffer: #############si puo' migliorare? basta non usare t1, ez
 	move $v0, $t1
 jr $ra
 
@@ -568,7 +573,7 @@ scritturaFile:
 		li	$v0, 16		# Close File Syscall
 		move	$a0, $t4	# Load File Descriptor
 		syscall
-		j fineScrittura
+		j jrra
 
 	# Error
 	erroreWriteFile:
@@ -576,5 +581,5 @@ scritturaFile:
 		la	$a0, fnf	# Load Error String
 		syscall
 
-	fineScrittura:
-jr $ra # Termine della procedura
+jrra:#Metodo ausiliario per utilizzare il jrra nei beq
+jr $ra
