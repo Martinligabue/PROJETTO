@@ -25,8 +25,8 @@ main:    # Procedura main
 	sw $ra, 0($sp) 		# Salvataggio del precedente $ra nello stack per poterlo ripristinare a fine procedura
 
 	la $a0, fileINmessaggio	# Nome del file che contiene il messaggio
-	li $a1, 0		# Identificatore che deve salvare in bufferMessage
-	jal letturaFile		# Chiamata della procedura per leggere il file indicato
+	li $a1, 0						# Identificatore che deve salvare in bufferMessage
+	jal letturaFile			# Chiamata della procedura per leggere il file indicato
 
 
 	la $a0, fileINchiave	# Nome del file che contiene la chiave
@@ -54,22 +54,14 @@ main:    # Procedura main
 
 # PROCEDURE
 
+# Procedura che fa lo switch di ogni elemento della chiave per chiamare nel giusto ordine gli algoritmi di cifratura e decifratura del messaggio
 
-
-# Procedura che fa lo switch di ogni elemento della chiave
-# per chiamare nel giusto ordine gli algoritmi
-# di cifratura e decifratura del messaggio
-
-switch:
-	addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
+switch:################## modificato e compresso
+	addi $sp, $sp, -16	# Posizionamento dello stack pointer per poter fare un push
 	sw $ra, 0($sp) 		# Salvataggio di $ra nello stack per poterlo ripristinare a fine procedura
-
-	addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
-	sw $s0, 0($sp)		# Salvataggio del precedente $s0 nello stack per poterlo ripristinare a fine procedura
-	addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
-	sw $s1, 0($sp)		# Salvataggio del precedente $s1 nello stack per poterlo ripristinare a fine procedura
-	addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
-	sw $s2, 0($sp)		# Salvataggio del precedente $s2 nello stack per poterlo ripristinare a fine procedura
+	sw $s0, 4($sp)		# Salvataggio del precedente $s0 nello stack per poterlo ripristinare a fine procedura
+	sw $s1, 8($sp)		# Salvataggio del precedente $s1 nello stack per poterlo ripristinare a fine procedura
+	sw $s2, 12($sp)		# Salvataggio del precedente $s2 nello stack per poterlo ripristinare a fine procedura
 
 	move $s2, $a0		# Mi copio in $s2 il valore che mi dice se devo cifrare o decifrare
 
@@ -77,15 +69,19 @@ switch:
 	la $t0, SwitchAlgA
 	li $t1, 0
 	sw $t0, jumpTable($t1)
+
 	la $t0, SwitchAlgB
 	addi $t1, $t1, 4
 	sw $t0, jumpTable($t1)
+
 	la $t0, SwitchAlgC
 	addi $t1, $t1, 4
 	sw $t0, jumpTable($t1)
+
 	la $t0, SwitchAlgD
 	addi $t1, $t1, 4
 	sw $t0, jumpTable($t1)
+
 	la $t0, SwitchAlgE
 	addi $t1, $t1, 4
 	sw $t0, jumpTable($t1)
@@ -181,7 +177,7 @@ jr $ra			# Termine della procedura
 
 # Procedura che cifra/decifra una stringa con l'Algoritmo B o C in base al valore passato in $a0
 # $a1 = 0 -> algoritmo B, $a1 = 1 -> algoritmo C
-algBC:
+algBC:########################################################Capire e dividere
 	li $t3, 0	# Contatore del buffer della stringa
 	move $t1, $a1	# Flag per indicare se devo applicare algoritmo o no
 
@@ -192,13 +188,13 @@ algBC:
 		beq $t1, 0, applyAlgBC	# Controllo il flag per verificare se devo applicare l'algoritmo
 
 		doNotApplyAlgBC:
-			li $t1, 0			# Indico che al prossimo ciclo dovr� essere applicato l'algoritmo
+			li $t1, 0			# Indico che al prossimo ciclo dovra' essere applicato l'algoritmo
 			j goAwayAlgBC
 
 		applyAlgBC:
 			add $t0, $t0, $a0		# Applico l'algoritmo sul carattere
 			sb $t0, bufferMessage($t3)	# Salvo il carattere cifrato
-			li $t1, 1			# Indico che al prossimo ciclo non dovr� essere applicato l'algoritmo
+			li $t1, 1			# Indico che al prossimo ciclo non dovra' essere applicato l'algoritmo
 
 		goAwayAlgBC:
 			addi $t3, $t3, 1		# Incremento del contatore del buffer per passare ai valori successivi
@@ -208,7 +204,7 @@ algBC:
 jr $ra			# Termine della procedura
 
 # Procedura che cifra/decifra una stringa con l'Algoritmo D
-algD:
+algD:##############################################################Da rifare
 	addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
 	sw $ra, 0($sp) 		# Salvataggio di $ra nello stack per poterlo ripristinare a fine procedura
 
@@ -237,17 +233,12 @@ algD:
 jr $ra			# Termine della procedura
 
 algCifraturaE:
-	addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
+	addi $sp, $sp, -20	# Posizionamento dello stack pointer per poter fare un push
 	sw $ra, 0($sp) 		# Salvataggio di $ra nello stack per poterlo ripristinare a fine procedura
-
-	addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
-	sw $s0, 0($sp)		# Salvataggio del precedente $s0 nello stack per poterlo ripristinare a fine procedura
-	addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
-	sw $s1, 0($sp)		# Salvataggio del precedente $s1 nello stack per poterlo ripristinare a fine procedura
-	addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
-	sw $s2, 0($sp)		# Salvataggio del precedente $s2 nello stack per poterlo ripristinare a fine procedura
-	addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
-	sw $s3, 0($sp)		# Salvataggio del precedente $s3 nello stack per poterlo ripristinare a fine procedura
+	sw $s0, 4($sp)		# Salvataggio del precedente $s0 nello stack per poterlo ripristinare a fine procedura
+	sw $s1, 8($sp)		# Salvataggio del precedente $s1 nello stack per poterlo ripristinare a fine procedura
+	sw $s2, 12($sp)		# Salvataggio del precedente $s2 nello stack per poterlo ripristinare a fine procedura
+	sw $s3, 16($sp)		# Salvataggio del precedente $s3 nello stack per poterlo ripristinare a fine procedura
 
 
 	li $t1, 0	# Contatore del buffer della stringa
@@ -283,6 +274,7 @@ algCifraturaE:
 			sb $t0, bufferMessage($t2)	# Scrivo il carattere nella stringa finale
 			addi $t2, $t2, 1		# Incremento il contatore di scrittura
 
+######################cercadestra e sinistra
 
 		trovaSuccessiveRicorrenze:	# Cerco le successive ricorrenze del carattere trovato
 			move $t3, $t1
@@ -359,32 +351,22 @@ algCifraturaE:
 		j forStringaAlgCifE	# Iterazione successiva
 
 	fineForStringaAlgCifE:
-	lw $s3, 0($sp)		# Ripristino del vecchio $s3 dallo stack
-	addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
-	lw $s2, 0($sp)		# Ripristino del vecchio $s2 dallo stack
-	addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
-	lw $s1, 0($sp)		# Ripristino del vecchio $s1 dallo stack
-	addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
-	lw $s0, 0($sp)		# Ripristino del vecchio $s0 dallo stack
-	addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
-
+	lw $s3, 16($sp)		# Ripristino del vecchio $s3 dallo stack
+	lw $s2, 12($sp)		# Ripristino del vecchio $s2 dallo stack
+	lw $s1, 8($sp)		# Ripristino del vecchio $s1 dallo stack
+	lw $s0, 4($sp)		# Ripristino del vecchio $s0 dallo stack
 	lw $ra, 0($sp)		# Ripristino del vecchio $ra dallo stack
-	addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
+	addi $sp, $sp, 20	# Risistemazione dello stack pointer dopo aver estratto un dato
 jr $ra			# Termine della procedura
 
 algDecifraturaE:
 
-	addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
+	addi $sp, $sp, -20	# Posizionamento dello stack pointer per poter fare un push
 	sw $ra, 0($sp) 		# Salvataggio di $ra nello stack per poterlo ripristinare a fine procedura
-
-	addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
-	sw $s0, 0($sp)		# Salvataggio del precedente $s0 nello stack per poterlo ripristinare a fine procedura
-	addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
-	sw $s1, 0($sp)		# Salvataggio del precedente $s1 nello stack per poterlo ripristinare a fine procedura
-	addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
-	sw $s2, 0($sp)		# Salvataggio del precedente $s2 nello stack per poterlo ripristinare a fine procedura
-	addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
-	sw $s3, 0($sp)		# Salvataggio del precedente $s3 nello stack per poterlo ripristinare a fine procedura
+	sw $s0, 4($sp)		# Salvataggio del precedente $s0 nello stack per poterlo ripristinare a fine procedura
+	sw $s1, 8($sp)		# Salvataggio del precedente $s1 nello stack per poterlo ripristinare a fine procedura
+	sw $s2, 12($sp)		# Salvataggio del precedente $s2 nello stack per poterlo ripristinare a fine procedura
+	sw $s3, 16($sp)		# Salvataggio del precedente $s3 nello stack per poterlo ripristinare a fine procedura
 
 
 	li $t1, 0	# Contatore del buffer della stringa
@@ -483,17 +465,12 @@ algDecifraturaE:
 		j forStringaAlgDecE	# Iterazione successiva
 
 	fineForStringaAlgDecE:
-	lw $s3, 0($sp)		# Ripristino del vecchio $s3 dallo stack
-	addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
-	lw $s2, 0($sp)		# Ripristino del vecchio $s2 dallo stack
-	addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
-	lw $s1, 0($sp)		# Ripristino del vecchio $s1 dallo stack
-	addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
-	lw $s0, 0($sp)		# Ripristino del vecchio $s0 dallo stack
-	addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
-
+	lw $s3, 16($sp)		# Ripristino del vecchio $s3 dallo stack
+	lw $s2, 12($sp)		# Ripristino del vecchio $s2 dallo stack
+	lw $s1, 8($sp)		# Ripristino del vecchio $s1 dallo stack
+	lw $s0, 4($sp)		# Ripristino del vecchio $s0 dallo stack
 	lw $ra, 0($sp)		# Ripristino del vecchio $ra dallo stack
-	addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
+	addi $sp, $sp, 20	# Risistemazione dello stack pointer dopo aver estratto un dato
 jr $ra			# Termine della procedura
 
 
@@ -513,14 +490,13 @@ jr $ra
 
 # Procedura "letturaFile" che viene utilizzata per leggere un file e salvarne il contenuto nel giusto spazio di memoria
 letturaFile:
-	addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
+	addi $sp, $sp, -8	# Posizionamento dello stack pointer per poter fare un push
 	sw $s0, 0($sp)		# Salvataggio del precedente $s0 nello stack per poterlo ripristinare a fine procedura
-	addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
-	sw $s1, 0($sp)		# Salvataggio del precedente $s1 nello stack per poterlo ripristinare a fine procedura
+	sw $s1, 4($sp)		# Salvataggio del precedente $s1 nello stack per poterlo ripristinare a fine procedura
 
 
 	# Apertura File
-	# Il nome del file viene gi� passato in $a0
+	# Il nome del file viene gia' passato in $a0
 	move $s0, $a1		# Salvataggio del registro $a1, che viene passato alla procedura, prima che venga sostituito
 	li $v0, 13		# Syscall per aprire un file
 	li $a1, 0		# Flag che indica l'intenzione di leggere nel file
@@ -560,17 +536,16 @@ letturaFile:
 	# In caso di errore di apertura del file
 	errorReadFile:
 		move $t0, $a0	# Salvataggio del nome del file da stampare
-		li $v0, 4	# Syscall per stampare
-		la $a0, fnf	# Stringa di errore da stampare
+		li $v0, 4			# Syscall per stampare
+		la $a0, fnf		# Stringa di errore da stampare
 		syscall
 		move $a0, $t0	# Nome del file da stampare dopo la stringa di errore
 		syscall
 
 	fineLettura:
-		lw $s1, 0($sp)		# Ripristino del vecchio $s1 dallo stack
-		addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
+		lw $s1, 4($sp)		# Ripristino del vecchio $s1 dallo stack
 		lw $s0, 0($sp)		# Ripristino del vecchio $s0 dallo stack
-		addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
+		addi $sp, $sp, 8	# Risistemazione dello stack pointer dopo aver estratto un dato
 
 jr $ra	# Termine della procedura
 
