@@ -46,7 +46,7 @@ main:    # Procedura main
 
 	lw $ra, 0($sp)		# Ripristino del vecchio $ra dallo stack
 	addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
-
+	
 	jr $ra  				#uscita dal main
 
 # PROCEDURE
@@ -198,24 +198,23 @@ algC:
 
 # Procedura che cifra/decifra una stringa con l'Algoritmo D
 ######################################################################################
-#algD:
+#algD: Procedura non piu' funzionante
 		addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
 		sw $ra, 0($sp) 		# Salvataggio di $ra nello stack per poterlo ripristinare a fine procedura
 
 		la $a0, bufferMessaggio
 		jal dimensioneBuffer
-		move $t0, $v0	# Valore dell'indice dell'ultimo elemento della stringa/////////////
-
+		move $t0, $v0	# Valore dell'indice dell'ultimo elemento della stringa
+		addi $t0,$t0,1
 		li $t1, 0	# Contatore del buffer della stringa
-
 
 		carica: 					#salva il testo nello stack
 
 		lb $t2,bufferMessaggio($t1)
-		addi $sp,$sp,-4 	 		# crea spazio per 1 words nello stack frame partendo dalla posizione -4
+		addi $sp,$sp,-4 	 		# apre lo stack
 		sw $t2,0($sp)
 		addi $t1,$t1,1
-		bge $t1,$t0,esciCarica 			# carica ogni byte del testo origionale nello stack
+		bgt $t1,$t0,esciCarica 			# carica ogni byte del testo originale nello stack
 		j carica
 
 		esciCarica:
@@ -223,12 +222,14 @@ algC:
 		la $a0, bufferMessaggio
 		jal dimensioneBuffer
 		move $t0, $v0
+		addi $t0,$t0,1
+
 		scarica: 					# inverte il testo originale della frase
 
 		addi $sp,$sp,4
 		lw $t2,0($sp)				#prende il valore proveniente dallo stack
 		sb $t2,bufferMessaggio($t1) 				#carica l'indirizzo del primo byte di t1 in t0
-		addi $t0,$t0,1 				#somma ogni byte di per poi caricarli ed invertirli successivamente
+		addi $t1,$t1,1 				#somma ogni byte di per poi caricarli ed invertirli successivamente
 
 		bge $t0,$t1,scarica 			#controlla se il contore e' arrivato alla posizione finale
 
@@ -236,15 +237,14 @@ algC:
 		addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
 
 		jr $ra
-
 ######################################################################################
-algD:##############################################################Da rifare
+algD:
 	addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
 	sw $ra, 0($sp) 		# Salvataggio di $ra nello stack per poterlo ripristinare a fine procedura
 
 	la $a0, bufferMessaggio
 	jal dimensioneBuffer
-	move $t0, $v0	# Valore dell'indice dell'ultimo elemento della stringa/////////////
+	move $t0, $v0	# Valore dell'indice dell'ultimo elemento della stringa
 
 	li $t1, 0	# Contatore del buffer della stringa
 
@@ -264,7 +264,7 @@ algD:##############################################################Da rifare
 	fineForStringaAlgD:
 		lw $ra, 0($sp)		# Ripristino del vecchio $ra dallo stack
 		addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
-jr $ra			# Termine della procedura
+jr $ra
 
 algCifraturaE:
 	addi $sp, $sp, -20	# Posizionamento dello stack pointer per poter fare un push
