@@ -198,32 +198,39 @@ algC:
 
 # Procedura che cifra/decifra una stringa con l'Algoritmo D
 ######################################################################################
-	#	algD:
+#algD:
 		addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
 		sw $ra, 0($sp) 		# Salvataggio di $ra nello stack per poterlo ripristinare a fine procedura
 
-		la $t4, bufferMessaggio			 	#possiamo sovrascrivere t0
+		la $a0, bufferMessaggio
+		jal dimensioneBuffer
+		move $t0, $v0	# Valore dell'indice dell'ultimo elemento della stringa/////////////
+
+		li $t1, 0	# Contatore del buffer della stringa
+
 
 		carica: 					#salva il testo nello stack
 
-		lb $t1,($t4)
-		la $t5,($sp)
+		lb $t2,bufferMessaggio($t1)
 		addi $sp,$sp,-4 	 		# crea spazio per 1 words nello stack frame partendo dalla posizione -4
-		sw $t1,0($sp)
-		addi $t4,$t4,1
-		bne $t1,$zero,carica 			# carica ogni byte del testo origionale nello stack
+		sw $t2,0($sp)
+		addi $t1,$t1,1
+		bge $t1,$t0,esciCarica 			# carica ogni byte del testo origionale nello stack
+		j carica
 
-		la $t4, bufferMessaggio				#carica l'indirizzo del testo originale in t0
-		addi $t4,$t4,-1
-
+		esciCarica:
+		li $t1,0
+		la $a0, bufferMessaggio
+		jal dimensioneBuffer
+		move $t0, $v0
 		scarica: 					# inverte il testo originale della frase
 
 		addi $sp,$sp,4
-		sb $t1,($t4) 				#carica l'indirizzo del primo byte di t1 in t0
-		addi $t4,$t4,1 				#somma ogni bayte di t0(t1) di per poi caricarli ed invertirli successivamente
-		lw $t1,0($sp)				#prende il valore proveniente dallo stack
+		lw $t2,0($sp)				#prende il valore proveniente dallo stack
+		sb $t2,bufferMessaggio($t1) 				#carica l'indirizzo del primo byte di t1 in t0
+		addi $t0,$t0,1 				#somma ogni byte di per poi caricarli ed invertirli successivamente
 
-		ble $t1,$t5,scarica 			#controlla se il contore e' arrivato alla posizione finale
+		bge $t0,$t1,scarica 			#controlla se il contore e' arrivato alla posizione finale
 
 		lw $ra, 0($sp)		# Ripristino del vecchio $ra dallo stack
 		addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
