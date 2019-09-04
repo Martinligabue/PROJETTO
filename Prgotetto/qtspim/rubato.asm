@@ -3,11 +3,11 @@
 # Data consegna: 04/09/2019
 
 .data
-jumpTable: 	.space 20 		# Spazio di memoria riservato alla JumpTable dello switch
-bufferKey: 	.space 4		# Spazio di memoria riservato per salvare la chiave
-bufferCifre:	.space 10		# Spazio di memoria riservato per salvare alcune cifre durante il funzionamento dell'algoritmo E
-bufferMessaggio: 		.space 200000	# Spazio di memoria riservato per salvare la stringa
-bufferMessaggioTemp: 	.space 200000	# Spazio di memoria riservato per il corretto funzionamento dell'algoritmo E
+jumpTable: 	.space 20 		# Buffer riservato alla JumpTable dello switch
+bufferKey: 	.space 4		# Buffer riservato per salvare la chiave
+bufferCifre:	.space 10		# Buffer riservato per salvare alcune cifre durante il funzionamento dell'algoritmo E
+bufferMessaggio: 		.space 200000	# Buffer riservato per salvare la stringa
+bufferMessaggioTemp: 	.space 200000	# Buffer riservato per il corretto funzionamento dell'algoritmo E
 
 erroreIO:			.asciiz  "Il file non e' stato trovato"
 messaggio:	.asciiz	"messaggio.txt"
@@ -16,8 +16,7 @@ cifrato:		.asciiz	"messaggioCifrato.txt"
 decifrato:	.asciiz	"messaggioDecifrato.txt"
 
 .text
-.globl main  	# Il programma comincia richiamando la procedura main
-
+.globl main
 
 main:    # Procedura main
 
@@ -363,11 +362,9 @@ algDecifraturaE:
 	sw $s2, 12($sp)
 	sw $s3, 16($sp)
 
-
 	li $t1, 0	# Contatore del buffer della stringa
   li $s1, 32	# Valore ASCII dello spazio
 	li $s2, 45	# Valore ASCII del simbolo -
-
 
 	# Copio bufferMessaggio to bufferMessaggioTemp
 	forCopiaBufferVersoTempDec:
@@ -377,7 +374,6 @@ algDecifraturaE:
 		sb $zero, bufferMessaggio($t1)		# Svuoto lo spazio su cui scrivero'
 		addi $t1, $t1, 1			# Incremento del contatore del buffer per passare ai valori successivi
 	j forCopiaBufferVersoTempDec	# Iterazione successiva
-
 
 	fineForCopiaBufferDec:
 		move $s0, $t1	# Mi salvo la lunghezza del buffer
@@ -390,7 +386,6 @@ algDecifraturaE:
 		lb $t0, bufferMessaggioTemp($t1)	# Carattere attuale da elaborare
 		beq $t0, $zero, fineForStringaAlgDecE   # Controllo fine della stringa e del ciclo
 
-
 		elaboraCarattere: # Il carattere da elaborare sta in $t0
 			li $t3, 0 # Contatore per svuotare lo spazio di memoria delle cifre
 			forSvuotoSpazioCifre:
@@ -399,7 +394,6 @@ algDecifraturaE:
 				sb $zero, bufferCifre($t3)		# Cancello la cifra
 				addi $t3, $t3, 1
 			j forSvuotoSpazioCifre
-
 
 			trovaSuccessiveCifre:	# Cerco le successive cifre del carattere trovato
 				addi $t1, $t1, 1
@@ -418,7 +412,6 @@ algDecifraturaE:
 				sb $t4, bufferCifre($t5)
 				addi $t5, $t5, 1
 				j forSuccessiveCifre
-
 
 				fineDellaCifra: # Se trovo un trattino o uno spazio
 				li $t3, 0
