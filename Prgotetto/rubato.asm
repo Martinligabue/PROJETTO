@@ -4,12 +4,12 @@
 
 .data
 jumpTable: 	.space 20 		# Spazio di memoria riservato alla Jump Table dello switch
-bufferKey: 	.space 5		# Spazio di memoria riservato per salvare la chiave
+bufferKey: 	.space 4		# Spazio di memoria riservato per salvare la chiave
 bufferCifre:	.space 10		# Spazio di memoria riservato per salvare alcune cifre durante il funzionamento dell'algoritmo E
 bufferMessage: 		.space 200000	# Spazio di memoria riservato per salvare la stringa
 bufferMessageSupport: 	.space 200000	# Spazio di memoria riservato per il corretto funzionamento dell'algoritmo E
 
-fnf:			.asciiz  "\nThe file was not found: "
+erroreIO:			.asciiz  "Il file non e' stato trovato"
 fileINmessaggio:	.asciiz	"messaggio.txt"
 fileINchiave:		.asciiz	"chiave.txt"
 fileOUTcifrato:		.asciiz	"messaggioCifrato.txt"
@@ -166,8 +166,7 @@ algA:
 	fineForStringaAlgA:
 jr $ra			# Termine della procedura
 
-# Procedura che cifra/decifra una stringa con l'Algoritmo B o C in base al valore passato in $a0
-# $a1 = 0 -> algoritmo B, $a1 = 1 -> algoritmo C
+# Procedura che cifra/decifra una stringa con l'Algoritmo B
 algB:########################################################Capire e dividere
 	li $t3, 0	# Contatore del buffer della stringa
 	move $t1, $a1	# Flag per indicare se devo applicare algoritmo o no
@@ -187,8 +186,7 @@ algB:########################################################Capire e dividere
 	fineForStringaAlgB:
 jr $ra			# Termine della procedura
 
-# Procedura che cifra/decifra una stringa con l'Algoritmo B o C in base al valore passato in $a0
-# $a1 = 0 -> algoritmo B, $a1 = 1 -> algoritmo C
+# Procedura che cifra/decifra una stringa con l'Algoritmo C
 algC:########################################################Capire e dividere
 	li $t3, 0	# Contatore del buffer della stringa
 	move $t1, $a1	# Flag per indicare se devo applicare algoritmo o no
@@ -200,8 +198,6 @@ algC:########################################################Capire e dividere
 			li $t1, 0			# Indico che al prossimo ciclo dovra' essere applicato l'algoritmo
 			addi $t3, $t3, 1		# Incremento del contatore del buffer per passare ai valori successivi
 	j forStringaAlgC	# Iterazione successiva
-
-
 
 # Procedura che cifra/decifra una stringa con l'Algoritmo D
 algD:##############################################################Da rifare
@@ -479,7 +475,7 @@ dimensioneBuffer:
 	li $t1, -1 #counter rows
 	forDimensioneBuffer:
 		lb $t0, 0($a0)
-		beq $t0, $zero, fineDimensioneBuffer 	# Controllo fine della stringa e del ciclo
+		beq $t0, $zero, fineDimensioneBuffer 	# Se il carattere ha valore zero esce dal ciclo
 		addi $t1, $t1, 1
 		addi $a0, $a0, 1
 	j forDimensioneBuffer
@@ -513,12 +509,12 @@ letturaFile:
 
 	openKeyFile:
 		la $a1, bufferKey	# Indirizzo del buffer in cui mettere i dati letti dal file
-		li $a2, 16		# Numero di caratteri da leggere
+		li $a2, 4		# Numero di caratteri da leggere
 		j openFile
 
 	openMessageFile:
 		la $a1, bufferMessage	# Indirizzo del buffer in cui mettere i dati letti dal file
-		li $a2, 1024		# Numero di caratteri da leggere
+		li $a2, 128		# Numero di caratteri da leggere
 
 	openFile:
 		syscall
@@ -537,9 +533,7 @@ letturaFile:
 	errorReadFile:
 		move $t0, $a0	# Salvataggio del nome del file da stampare
 		li $v0, 4			# Syscall per stampare
-		la $a0, fnf		# Stringa di errore da stampare
-		syscall
-		move $a0, $t0	# Nome del file da stampare dopo la stringa di errore
+		la $a0, erroreIO		# Stringa di errore da stampare
 		syscall
 
 	fineLettura:
@@ -573,7 +567,7 @@ scritturaFile:
 	# Error
 	erroreWriteFile:
 		li	$v0, 4		# Print String Syscall
-		la	$a0, fnf	# Load Error String
+		la	$a0, erroreIO	# Load Error String
 		syscall
 
 	jrra:#Metodo ausiliario per utilizzare il jr $ra nei beq
