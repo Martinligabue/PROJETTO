@@ -1,676 +1,594 @@
-.data
+# Progetto di Assembly realizzato da Martin Ligabue, Riccardo Zamporlini, Gianmarco Aldinucci
+# nome.cognome@stud.unifi.it,
+# Data consegna: 04/09/2019
 
-testoerrorealgoritmo: .asciiz "e' stata inserita una chiave non corretta"
-eroreio: .asciiz "si e' presentato un errore nell'apertura del file"
-filein: .asciiz "messaggio.txt"
-chiave: .asciiz "chiave.txt"
-filedecifr: .asciiz "messaggioDecifrato.txt"
-filecifr: .asciiz "messaggioCifrato.txt"
-buffer: .space 128
-buffer2: .space 4
-bufferTemp: .space 256
+.data
+jumpTable: 	.space 20 		# Buffer riservato alla JumpTable dello switch
+bufferKey: 	.space 4		# Buffer riservato per salvare la chiave
+bufferCifre:	.space 10		# Buffer riservato per salvare alcune cifre durante il funzionamento dell'algoritmo E
+bufferMessaggio: 		.space 200000	# Buffer riservato per salvare la stringa
+bufferMessaggioTemp: 	.space 200000	# Buffer riservato per il corretto funzionamento dell'algoritmo E
+
+erroreIO:			.asciiz  "Il file non e' stato trovato"
+messaggio:	.asciiz	"messaggio.txt"
+chiave:		.asciiz	"chiave.txt"
+cifrato:		.asciiz	"messaggioCifrato.txt"
+decifrato:	.asciiz	"messaggioDecifrato.txt"
 
 .text
-main:
-		jal open
+.globl main
 
-		move $s1, $t1					#salvo in $s1 e $s7 la lunghezza del testo CHIAVE
-		move $s7, $t1
-		la $t0, buffer2
+main:    # Procedura main
 
-		jal sceltaalgoritmo
+	addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
+	sw $ra, 0($sp) 		# Salvataggio del precedente $ra nello stack per poterlo ripristinare a fine procedura
 
-		la $t0, buffer2				#salvo in $t0 il testo chiave e lo faccio partire dall'ultimo carattere
-		addi $t0, $t0, 4			#parte dal 4 carattere, per poi tornare indietro nel ciclo successivo
+	la $a0, messaggio	# Nome del file che contiene il messaggio
+	li $a1, 0						# Identificatore che deve salvare in bufferMessaggio
+	jal letturaFile			# Chiamata della procedura per leggere il file indicato
 
-		jal invertialgoritmi
+	la $a0, chiave	# Nome del file che contiene la chiave
+	li $a1, 1		# Identificatore che deve salvare in bufferKey
+	jal letturaFile		# Chiamata della procedura per leggere il file indicato
 
-		jal stampacriptato
+	li $a0, 1		# il valore 1 sta ad indicare il voler cifrare il messaggio
+	jal switch 		# Chiamo procedura che switcha la chiave per cifrare
 
-		j jrra
-############################################################à
-open:						#apertura file
+	la $a0, cifrato	# Nome del file in cui scrivere il messaggio cifrato
+	jal scritturaFile	# Chiamata della procedura per scrivere il messaggio decifrato
 
-	li $v0, 13				# apriamo il file
-	la $a0, filein		# nome file
-	la $a1, 0					# legge e basta
-	la $a2, 0					# ignorato
-	syscall
+	li $a0, -1		# il valore -1 indica il voler decifrare il messaggio
+	jal switch 		# Chiamo procedura che switcha la chiave per decifrare
 
-	move $t0, $v0				# salvimo in t0 il descrittore del file
-	blt $v0, 0, errore	#quando il descrittore e' minore di 0 significa che si e' verificato un errore
+	la $a0, decifrato	# Nome del file in cui scrivere il messaggio decifrato
+	jal scritturaFile		# Chiamata della procedura per scrivere il messaggio decifrato
+
+	lw $ra, 0($sp)		# Ripristino del vecchio $ra dallo stack
+	addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
 
-read:
+	jr $ra  				#uscita dal main
 
-	li $v0, 14				# legge file
-	move $a0, $t0
-	la $a1, buffer				# salviamo nel buffer il contenuto del file
-	li $a2, 128
-	syscall
+# PROCEDURE
 
-close:
+# Procedura che fa lo switch di ogni elemento della chiave per chiamare nel giusto ordine gli algoritmi di cifratura e decifratura del messaggio
 
-		li  $v0, 16
-		move  $a0, $t0
-  	syscall
+switch:
+	addi $sp, $sp, -16	# Posizionamento dello stack pointer per poter fare un push
+	sw $ra, 0($sp) 		# Salvataggio di alcuni registri per ripristinarli a fine procedura
+	sw $s0, 4($sp)
+	sw $s1, 8($sp)
+	sw $s2, 12($sp)
 
-  	li $t1, 0
+	move $s2, $a0		# Mi copio in $s2 il valore che mi dice se devo cifrare o decifrare
 
-  	la $t0, buffer
+	# Creazione della JumpTable con i 5 casi relativi ai 5 algoritmi
+	la $t0, SwitchAlgA
+	li $t1, 0
+	sw $t0, jumpTable($t1)
 
-lunghezzabuffer:
+	la $t0, SwitchAlgB
+	addi $t1, $t1, 4
+	sw $t0, jumpTable($t1)
 
-	lb $t2, ($t0)
-	bge $t1, 128, openK		#fa il ciclo finche' non si riempe il buffer
-	beq $t2, 0, openK			#fa il ciclo finche' non finisce il testo
-	addi $t1, $t1, 1			#contatore
-	addi $t0, $t0, 1
+	la $t0, SwitchAlgC
+	addi $t1, $t1, 4
+	sw $t0, jumpTable($t1)
+
+	la $t0, SwitchAlgD
+	addi $t1, $t1, 4
+	sw $t0, jumpTable($t1)
 
-	j lunghezzabuffer
+	la $t0, SwitchAlgE
+	addi $t1, $t1, 4
+	sw $t0, jumpTable($t1)
 
-openK:
 
-	move $s0, $t1
-	li $v0, 13				# apriamo il file chiave
-	la $a0, chiave		# nome file chiave
-	la $a1, 0					# legge e basta
-	la $a2, 0					# ignorato
-	syscall
+	beq $s2, 1, switchCifratura
+	# Caso decifratura: leggo la chiave da destra a sinistra
+		la $a0, bufferKey
+		jal dimensioneBuffer	# conto quanti elementi sono presenti nella chiave
+		move $s1, $v0 		# Il contatore del buffer della stringa viene posizionato sull'ultimo elemento della chiave
+		j forStringaChiave
 
-	move $t1, $v0				# salvimo in t0 il descrittore del file chiave
-	blt $v0, 0, errore
+	switchCifratura:	# leggo la chiave da sinistra a destra
+		li $s1, 0	# Il contatore del buffer della stringa viene posizionato sul primo elemento della chiave
 
-readK:
-
-	li $v0, 14				# legge file chiave
-	move $a0, $t1
-	la $a1, buffer2				# salviamo nel buffer il contenuto del file chiave
-	li $a2, 4				#dobbiamo mettere il caso di errore
-	syscall
-
-closeK:
-
- 	 li  $v0, 16
-	 move  $a0, $t1
-	 syscall
-	 la $t0, buffer2
-	 li $t1, 0
-
-lunghezzabuffer2:
-
-	lb $t2, ($t0)
-	bge $t1, 128, jrra		#come prima ma con il file chiave.txt
-	beq $t2, 0, dopo
-	addi $t1, $t1, 1
-	addi $t0, $t0, 1
-
-	j lunghezzabuffer2
-
-############################################################
-sceltaalgoritmo:			#scorre il buffer contenente le chiavi carattere per carattere
-
-	lb $t2, ($t0)
-	ble $s1, 0, stampacriptato
-	beq $t2, 'A', algoritmoA
-	beq $t2, 'B', algoritmoB
-	beq $t2, 'C', algoritmoC
-	beq $t2, 'D', algoritmoD
-	beq $t2, 'E', algoritmoE
-
-	li $v0, 4
-	la $a0, testoerrorealgoritmo
-	syscall
-
-	j jrra
-
-	############################################################
-preinverti:
-	jr $ra
-
-invertialgoritmi:					#scorre il buffer contenente le chiavi in ordine inverso carattere per carattere
-
-	lb $t2, ($t0)
-	ble $s7, 0, stampadecriptato			#da impostare il metodo fine per far terminare il programma
-	beq $t2, 'A', invertialgoritmoA		#jal
-	beq $t2, 'B', invertialgoritmoB
-	beq $t2, 'C', invertialgoritmoC
-	beq $t2, 'D', invertialgoritmoD
-	beq $t2, 'E', invertialgoritmoE
-
-	addi $t0, $t0, -1
-
-	j invertialgoritmi
-
-algoritmoA:
-
-	move $t7, $t0					#salva il valore di t0 in t7, per ripristinarlo in seguito
-	la $t0, buffer			 	#possiamo sovrascrivere t0
-
-cicloA:						#	stampa il carattere aumentato di 4
-
-	lb $t3,($t0)
-	beq $t3,0,exit
-	addi $t2,$t3,4
-	li $t3,256				#ci serve il valore 256
-	div $t2,$t3				#per evitare overflow
-	mfhi $t2					#prende il numero senza overflow
-	sb $t2,($t0) 				#imposta il carattere  nella posizione di memoria del primo byte
-	add $t0,$t0,1 				#incrementa il contatore
-
-	j cicloA
-
-algoritmoB:
-
-	move $t7, $t0
-	la $t0,buffer			 	#possiamo sovrascrivere t0
-	addi $t0, $t0, 1		#per partire dal secondo carattere
-
-cicloB:
-
-	lb $t3,($t0)
-	beq $t3,0,exit
-	addi $t2,$t3,4
-	li $t3,256					#t3 non ci serve piu'
-	div $t2,$t3					#per evitare overflow
-	mfhi $t2
-	sb $t2,($t0) 				#imposta il carattere nella posizione di memoria del primo byte
-	add $t0,$t0,2				#incrementa il contatore di due
-
-	j cicloB
-
-algoritmoC:
-
-	move $t7, $t0
-	la $t0,buffer			 	#possiamo sovrascrivere t0
-
-cicloC:
-
-	lb $t3,($t0)
-	beq $t3,0,exit
-	addi $t2,$t3,4
-	li $t3,256				#t3 non ci serve piu'
-	div $t2,$t3				#per evitare overflow
-	mfhi $t2
-	sb $t2,($t0) 				#imposta il carattere  nella posizione di memoria del primo byte
-	add $t0,$t0,2				#incrementa il contatore
-
-	j cicloC
-
-algoritmoD:
-
-	move $t7, $t0
-	la $t0, buffer			 	#possiamo sovrascrivere t0
-
-carica: 					#salva il testo nello stack
-
-	lb $t1,($t0)
-	addi $sp,$sp,-4 	 		# crea spazio per 1 words nello stack frame partendo dalla posizione -4
-	sw $t1,0($sp)
-	addi $t0,$t0,1
-	bne $t1,$zero,carica 			# carica ogni byte del testo origionale nello stack
-
-	la $t0, buffer				#carica l'indirizzo del testo originale in t0
-	addi $t0,$t0,-1
-
-scarica: 					# inverte il testo originale della frase
-
-	addi $sp,$sp,4
-	sb $t1,($t0) 				#carica l'indirizzo del primo byte di t1 in t0
-	addi $t0,$t0,1 				#somma ogni bayte di t0(t1) di per poi caricarli ed invertirli successivamente
-	lw $t1,0($sp)				#prende il valore proveniente dallo stack
-	bne $t1,$zero,scarica 			#controlla se il contore e' arrivato alla posizione finale
-	##################aggiornare con indirizzo invece che zero
-
-	j exit
-
-algoritmoE:
-
-salvaStack:
-
-	addi $sp,$sp,-12
-	sw $t0,0($sp)
-	sw $s0,4($sp)
-	sw $s1,8($sp)
-	move $s3,$s0 				#imposta a $s3 la lunghezza di buffer
-
-resetValori:
-
-	li $t0,0
-	li $t9,0
-	li $s1,0
-
-inizio:
-
-	la $s0,buffer				#impostiamo le variabili $s0, e $s2 rispettivamente a testo e spazio
-	la $s2,bufferTemp			#da impostare con un buffer temporaneo
-	move $t0, $s0				#creiamo una variable con lo stesso valore di -testo-
-	li $s1, -1
-
-spaziocarattere:
-
-	li $t8, ' '
-	sb $t8, ($s2)
-	addi $s2,$s2,1
-	j lettura
-
-prelettura:
-
-	li $t1,0 				#si resettano $t0 e $t1, cosi' che il ciclo di conta non interferisca
-	move $t0, $s0
-
-lettura:
-
-	bge $s1,$s3,ripristinaStack
-	lb $t1,($t0) 				#carico in $t1 la prima lettera del testo(f)
-	move $s4,$t0 				#in $s4 mettiamo l'indirizzo della lettera che analizzeremo per poi utilizzarlo in "controllodx"
-	addi $t0,$t0,1 				#contatore dell'indirizzo della lettera
-	addi $s1,$s1,1 				#contatore della lettera che leggiamo
-	li $t2, 0	 			#contatore che parte da 0 per il controllo a sx####forse, se abbiamo voglia, lo mettiamo nel resetta
-	move $t3, $s0 				#si resetta sempre al primo indirizzo del testo
-
-	j controllosx
-
-controllosx:
-
-	bge $t2,$s1, salvalettera     		#finche $t2(contatore posizione) e' minore o uguale di $s1(contatore lettera esaminata) continua ciclo
-	addi $t2,$t2,1 				#contatore per il controllo a sx
-	lb $t4, ($t3)				#carico in $t4 il carattere da controllare
-	addi $t3,$t3,1 				#contatore per la posizione del carattere da controllare
-	beq $t1,$t4, lettura			#controllo se i due caratteri sono uguali
-
-	j controllosx
-
-salvalettera:
-
-
-	sb $t1, ($s2) 				#si carica la lettera non doppia nello space
-	addi $s2,$s2,1				#si aumenta lo space per passare alla prossima posizione
-	move $t5,$s1 				#$t5 diventa il contatore che verra' utilizzato in controllo a dx per non modificare $s1 e poterlo riutilizzare
-
-controllodx:
-
-	bge $t5,$s3, spaziocarattere
-
-	lb $t4,($s4) 				#in $t4 carichiamo la lettera da confrontare
-	move $s6,$t5				#$s6 diventa il valore numerico di $t5 e lo utilizzeremo in "ciclonumero"
-
-	addi $s4,$s4,1				#si sposta di 1 l'indirizzo della lettera a destra da confrontare
-	addi $t5,$t5,1				#contatore per controllo a destra
-	beq $t1,$t4, scriviposizione	 	#se lettera non doppia e' uguale a quella che scorre a destra salva la posizione
-
-	j controllodx
-
-scriviposizione:
-
-	li $t8, '-'
-	sb $t8, ($s2)
-	addi $s2,$s2,1
-	j ciclonumero
-
-ciclonumero:
-
-	addi $sp,$sp, -4 			#apre uno stack
-	addi $t9,$t9,1
-	li $s5,10
-	div $s6, $s5
-	mfhi $t6
-	mflo $s6
-	sb $t6,0($sp)
-	beq $s6,0,caricaNumero
-	j ciclonumero
-
-caricaNumero:
-
-	addi $t9,$t9,-1
-	lw $t3,0($sp)
-	addi $sp,$sp,4
-	addi $t3,$t3,48
-	sb $t3,($s2) 				#inserisce il valore preso dallo stack come carattere in space
-	addi $s2,$s2,1
-	bge $t9,1,caricaNumero			#quando fa piu' di un ciclo fa il ciclo
-	j controllodx
-
-ripristinaStack:
-
-	li $t0,0
-	la $t1,buffer 				#posizione nel buffer temp
-	la $t2,bufferTemp
-	addi $t2, $t2, 1
-
-cicloripristina:			#copia nel buffer
-
-	addi $t0, $t0, 1
-	addi $t1, $t1, 1
-	addi $t2, $t2, 1
-	lb $t3,($t2)
-	sb $t3,($t1)
-	ble $t0,126,cicloripristina
-
-	lw $t0, 0($sp)
-	lw $s0, 4($sp)
+	forStringaChiave:	# Ciclo di tutti i caratteri della chiave
+		lb $s0, bufferKey($s1)			# Carattere attuale da elaborare
+		beq $s0, $zero, FineSwitch	 	# Controllo fine della stringa e del ciclo
+		add $s1, $s1, $s2			# Incremento/Decremento il contatore del buffer per passare al valore successivo
+
+		li $t9, 4		# Moltiplico per 4 per saltare alla giusta posizione della JumpTable
+		li $t8, 65		# Valore da sottrarre per trasformare le lettere A/B/C/D/E in 0/1/2/3/4
+		sub $s0, $s0, $t8	# Calcolo dell'indice della JumpTable per avere l'indirizzo a cui saltare
+		mul $s0, $s0, $t9
+
+		lw $t4, jumpTable($s0)	# Salto al registro calcolato fornito dall JumpTable
+		jr $t4
+
+	SwitchAlgA:
+		mul $a0, $s2, 4	# in base al valore presente in $s2 decido se voler cifrare o deifrare
+		jal algA	# Chiamo algoritmo A sia per cifrare che decifrare
+	j forStringaChiave	# Iterazione successiva
+
+	SwitchAlgB:
+		mul $a0, $s2, 4	# in base al valore presente in $s2 decido se voler cifrare o deifrare
+		li $a1, 0	# Imposto che voglio utilizzare l'algoritmo B
+		jal algB	# Chiamo algoritmo B
+	j forStringaChiave	# Iterazione successiva
+
+	SwitchAlgC:
+		mul $a0, $s2, 4	# in base al valore presente in $s2 decido se voler cifrare o deifrare
+		li $a1, 1	# Imposto che voglio utilizzare l'algoritmo C
+		jal algC	# Chiamo la procedura per cifrare o decifrare con algoritmo C//
+	j forStringaChiave	# Iterazione successiva
+
+	SwitchAlgD:
+		jal algD	# Chiamo algoritmo D
+	j forStringaChiave	# Iterazione successiva
+
+	SwitchAlgE:
+		beq $s2, 1, SwitchAlgECif	# controllo per cifrare o decifrare
+			jal algDecifraturaE	# Cifratura con algoritmo E
+			j forStringaChiave
+		SwitchAlgECif:
+			jal algCifraturaE	# Decifratura con algoritmo E
+	j forStringaChiave	# Iterazione successiva
+
+	FineSwitch:
+		lw $s2, 12($sp)		# Ripristino ddi alcuni registri dallo stack
+		lw $s1, 8($sp)
+		lw $s0, 4($sp)
+		lw $ra, 0($sp)
+		addi $sp, $sp, 16	# Risistemazione dello stack pointer dopo aver estratto un dato
+jr $ra
+
+# ALGORITMI DI CIFRATURA/DECIFRATURA
+
+# Procedura che cifra/decifra una stringa con l'Algoritmo A in base al valore passato in $a0
+algA:
+	li $t3, 0	# Contatore del buffer della stringa
+
+	forStringaAlgA:	# Ciclo di tutti i caratteri della stringa
+		lb $t0, bufferMessaggio($t3)		# Carattere attuale da elaborare
+		beq $t0, $zero, fineForStringaAlgA 	# Controllo fine della stringa e del ciclo
+
+		add $t0, $t0, $a0		# Applico l'algoritmo sul carattere selezionato
+		sb $t0, bufferMessaggio($t3)	# Salvo il carattere cifrato
+
+		addi $t3, $t3, 1		# Incremento del contatore del buffer per passare ai valori successivi
+	j forStringaAlgA	# Iterazione successiva
+
+	fineForStringaAlgA:
+jr $ra			# Termine della procedura
+
+# Procedura che cifra/decifra una stringa con l'Algoritmo B
+algB:
+	li $t3, 0	# Contatore del buffer della stringa
+	move $t1, $a1	# Flag per indicare se devo applicare algoritmo o no
+
+	forStringaAlgB:	# Ciclo di tutti i caratteri della stringa
+		lb $t0, bufferMessaggio($t3)		# Carattere attuale da elaborare
+		beq $t0, $zero, fineForStringaAlgB 	# Controllo fine della stringa e del ciclo
+		add $t0, $t0, $a0		# Applico l'algoritmo sul carattere selezionato
+		sb $t0, bufferMessaggio($t3)	# Salvo il carattere cifrato
+		li $t1, 1			# inserendo 1 indico che non voglio applicare l'algoritmo al ciclo successivo
+
+		addi $t3, $t3, 1		# Incremento del contatore del buffer per passare ai valori successivi
+	j forStringaAlgB	# Iterazione successiva
+
+	fineForStringaAlgB:
+jr $ra			# Termine della procedura
+
+# Procedura che cifra/decifra una stringa con l'Algoritmo C
+algC:
+	li $t3, 0	# Contatore del buffer della stringa
+	move $t1, $a1	# Flag per indicare se devo applicare algoritmo o no
+
+	forStringaAlgC:	# Ciclo di tutti i caratteri della stringa
+		lb $t0, bufferMessaggio($t3)		# Carattere attuale da elaborare
+		beq $t0, $zero, jrra 	# Controllo fine della stringa e del ciclo
+
+			li $t1, 0			# inserendo 1 indico che voglio applicare l'algoritmo al ciclo successivo
+			addi $t3, $t3, 1		# Incremento del contatore del buffer per passare ai valori successivi
+	j forStringaAlgC	# Iterazione successiva
+
+# Procedura che cifra/decifra una stringa con l'Algoritmo D
+######################################################################################
+#algD: Procedura non piu' funzionante
+		addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
+		sw $ra, 0($sp) 		# Salvataggio di $ra nello stack per poterlo ripristinare a fine procedura
+
+		la $a0, bufferMessaggio
+		jal dimensioneBuffer
+		move $t0, $v0	# Valore dell'indice dell'ultimo elemento della stringa
+		addi $t0,$t0,1
+		li $t1, 0	# Contatore del buffer della stringa
+
+		carica: 					#salva il testo nello stack
+
+		lb $t2,bufferMessaggio($t1)
+		addi $sp,$sp,-4 	 		# apre lo stack
+		sw $t2,0($sp)
+		addi $t1,$t1,1
+		bgt $t1,$t0,esciCarica 			# carica ogni byte del testo originale nello stack
+		j carica
+
+		esciCarica:
+		li $t1,0
+		la $a0, bufferMessaggio
+		jal dimensioneBuffer
+		move $t0, $v0
+		addi $t0,$t0,1
+
+		scarica: 					# inverte il testo originale della frase
+
+		addi $sp,$sp,4
+		lw $t2,0($sp)				#prende il valore proveniente dallo stack
+		sb $t2,bufferMessaggio($t1) 				#carica l'indirizzo del primo byte di t1 in t0
+		addi $t1,$t1,1 				#somma ogni byte di per poi caricarli ed invertirli successivamente
+
+		bge $t0,$t1,scarica 			#controlla se il contore e' arrivato alla posizione finale
+
+		lw $ra, 0($sp)		# Ripristino del vecchio $ra dallo stack
+		addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
+
+		jr $ra
+######################################################################################
+algD:
+	addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
+	sw $ra, 0($sp) 		# Salvataggio di $ra nello stack per poterlo ripristinare a fine procedura
+
+	la $a0, bufferMessaggio
+	jal dimensioneBuffer
+	move $t0, $v0	# Valore dell'indice dell'ultimo elemento della stringa
+
+	li $t1, 0	# Contatore del buffer della stringa
+
+	forStringaAlgD:	# Ciclo di tutti i caratteri della stringa
+		sub $t3, $t0, $t1
+		bge $t1, $t3, fineForStringaAlgD #continua finche' non si scambiano, poi esce
+
+		lb $t2, bufferMessaggio($t1)	# Carattere n
+		lb $t4, bufferMessaggio($t3)	# Carattere lenght-n
+
+		sb $t4, bufferMessaggio($t1)	# Scambio i due valori nello spazio di memoria
+		sb $t2, bufferMessaggio($t3)
+
+		addi $t1, $t1, 1		# Incremento del contatore del buffer per passare ai valori successivi
+	j forStringaAlgD	# Iterazione successiva
+
+	fineForStringaAlgD:
+		lw $ra, 0($sp)		# Ripristino del vecchio $ra dallo stack
+		addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
+jr $ra
+
+algCifraturaE:
+	addi $sp, $sp, -20	# Posizionamento dello stack pointer per poter fare un push
+	sw $ra, 0($sp) 		# Salvataggio di alcuni registri nello stack per poterli ripristinare a fine procedura
+	sw $s0, 4($sp)
+	sw $s1, 8($sp)
+	sw $s2, 12($sp)
+	sw $s3, 16($sp)
+
+	li $t1, 0	# Contatore del buffer della stringa
+  li $s1, 32	# Valore ASCII del simbolo " "
+	li $s2, 45	# Valore ASCII del simbolo "-"
+
+	# Copio bufferMessaggio to bufferMessaggioTemp
+	forCopiaBufferToSupport:
+		lb $t0, bufferMessaggio($t1)		# Carattere attuale da copiare
+		beq $t0, $zero, fineForCopiaBuffer  	# Controllo fine della stringa e del ciclo
+		sb $t0, bufferMessaggioTemp($t1)	# Effettuo la copia del carattere
+		addi $t1, $t1, 1			# Incremento del contatore del buffer per passare ai valori successivi
+	j forCopiaBufferToSupport	# Iterazione successiva
+
+	fineForCopiaBuffer:
+		move $s0, $t1	# Mi salvo la lunghezza del buffer
+		li $t1, 0	# Resetto il contatore del buffer della stringa per usarlo su bufferMessaggioTemp
+		li $t2, 0	# Contatore di scrittura per bufferMessaggio
+
+	forStringaAlgCifE:	# Ciclo di tutti i caratteri della stringa
+		bge $t1, $s0, fineForStringaAlgCifE 	# Controllo fine della stringa e del ciclo
+		lb $t0, bufferMessaggioTemp($t1)	# Carattere attuale da elaborare
+		beq $t0, $zero, esceAlgE		# Se il carattere e' gia' stato elaborato, va al successivo
+
+		beq $t2, 0, stampaCarattereAlgE
+		sb $s1, bufferMessaggio($t2)	# Scrivo lo spazio nel buffer finale
+		addi $t2, $t2, 1		# Incremento il contatore di scrittura
+
+		stampaCarattereAlgE:
+			beq $t0, 32, trovaSuccessiveRicorrenze
+			sb $t0, bufferMessaggio($t2)	# Scrivo il carattere nel buffer finale
+			addi $t2, $t2, 1		# Incremento il contatore di scrittura
+
+		trovaSuccessiveRicorrenze:	# controllo se si ripete il carattere analizzato
+			move $t3, $t1
+			sub $t3, $t3, 1
+
+		forCercaDestra:
+			addi $t3, $t3, 1
+			bgt $t3, $s0, fineForSuccessiveRicorrenze 	# Controllo fine della stringa e del ciclo
+			lb $t4, bufferMessaggioTemp($t3)		# Carico il carattere da controllare
+			bne $t0, $t4, forCercaDestra		# Se il carattere non è uguale, passo al successivo
+
+			# Se invece il carattere mi interessa
+			sb $zero, bufferMessaggioTemp($t3) 	# Lo cancello, per evitare di riesaminarlo
+			sb $s2, bufferMessaggio($t2)		# Scrivo il separatore nel buffer finale
+			addi $t2, $t2, 1			# Incremento il contatore di scrittura
+
+			li $s3, 10 	# Numero per cui dividere se voglio scorrere le cifre di un numero
+			move $t6, $t3
+
+        		li $t7, 0 	# Contatore scrittura su bufferCifre
+
+			forScorroCifre:	# Scorro le cifre della posizione//////
+				div $t6, $s3
+				mfhi $t5	# resto della divisione per 10
+				mflo $t6	# quoziente della divisione per 10
+
+        			addi $t5, $t5, 48
+
+				sb $t5, bufferCifre($t7)	# Scrivo la sua posizione nella stringa finale
+				addi $t7, $t7, 1		# Incremento il contatore di scrittura
+
+				beq $t6, 0, fineForScorroCifre
+			j forScorroCifre
+
+			fineForScorroCifre:
+				li $t9, 1
+				sub $t7, $t7, $t9
+				move $t5, $t7
+				li $t6, 0 	# Contatore bufferCifre
+
+			forInvertoCifre:	# Ciclo di tutti i caratteri della stringa per invertirli
+				sub $t7, $t5, $t6
+				bge $t6, $t7, fineForInvertoCifre
+
+				lb $t8, bufferCifre($t6)	# Carattere n
+				lb $t9, bufferCifre($t7)	# Carattere lenght-n
+
+				sb $t9, bufferCifre($t6)	# Scambio i due valori
+				sb $t8, bufferCifre($t7)
+
+				addi $t6, $t6, 1		# Incremento del contatore del buffer per passare ai valori successivi
+			j forInvertoCifre	# Iterazione successiva
+
+			fineForInvertoCifre:
+				li $t6, 0 			# Contatore bufferCifre
+				addi $t5, $t5, 1
+
+			forCopiaBufferCifre:	# Copio la cifra della posizione nel messaggio
+				beq $t5, $t6, forCercaDestra
+
+				lb $t7, bufferCifre($t6)	# Carattere da copiare
+				sb $t7, bufferMessaggio($t2)	# Scrivo il carattere nella stringa finale
+				addi $t2, $t2, 1		# Incremento il contatore di scrittura
+
+				addi $t6, $t6, 1
+			j forCopiaBufferCifre
+
+		j forCercaDestra
+
+		fineForSuccessiveRicorrenze:
+
+		esceAlgE:
+			addi $t1, $t1, 1		# Incremento il contatore del buffer per passare ai valori successivi
+
+		j forStringaAlgCifE	# Iterazione successiva
+
+	fineForStringaAlgCifE:
+	lw $s3, 16($sp)		# Ripristino di vari registri dallo stack
+	lw $s2, 12($sp)
 	lw $s1, 8($sp)
-	addi $sp, $sp, 12
-
-	addi $t0,$t0,1
-	addi $s1, $s1, -1
-
-	j sceltaalgoritmo
-
-invertialgoritmoA:
-
-	move $t7, $t0
-	li $t4,256
-	la $t0, buffer
-
-cicloinvA:
-
-	lb $t3, ($t0)
-	beq $t3, 0, exitinvertito
-	addi $t2, $t3, -4			#toglie 4 posizioni all'ascii
-	addi $t2, $t2, 256			#aggiunge 256 per evitare l'underflow in caso di file danneggiato
-	div $t2, $t4
-	mfhi $t2
-	sb $t2, ($t0)				#imposta la lettera nella posizione di memoria del primo byte
-	add $t0, $t0, 1				#incrementa il contatore
-
-	j cicloinvA
-
-invertialgoritmoB:
-
-	move $t7, $t0
-	li $t4,256
-	la $t0, buffer
-	addi $t0, $t0, 1
-
-cicloinvB:
-
-	lb $t3, ($t0)
-	beq $t3, 0, exitinvertito
-	addi $t2, $t3, -4			#toglie 4 posizioni all'ascii
-	div $t2, $t4
-	mfhi $t2
-	sb $t2, ($t0)				#imposta la lettera nella posizione di memoria del primo byte
-	add $t0, $t0, 2				#incrementa il contatore
-
-	j cicloinvB
-
-invertialgoritmoC:
-
-	move $t7, $t0
-	li $t4,256
-	la $t0, buffer
-
-cicloinvC:
-
-	lb $t3, ($t0)
-	beq $t3, 0, exitinvertito
-	addi $t2, $t3, -4			#toglie 4 posizioni all'ascii
-	div $t2, $t4
-	mfhi $t2
-	sb $t2, ($t0)				#imposta la lettera nella posizione di memoria del primo byte
-	add $t0, $t0, 2				#incrementa il contatore
-
-	j cicloinvC
-
-
-invertialgoritmoD:
-
-	move $t7, $t0
-	la $t0,buffer			 	#possiamo sovrascrivere t0
-
-caricainv: 					#salva il testo nelllo stack
-
-	lb $t1,($t0)
-	addi $sp,$sp,-4 	 		# crea spazio per 1 words nello stack frame partendo dalla posizione -4
-	sw $t1,0($sp)
-	addi $t0,$t0,1
-	bne $t1,$zero,caricainv 		# carica ogni byte del testo origionale nello stack
-
-	la $t0, buffer				#carica l'indirizzo del testo originale in t0
-	addi $t0,$t0,-1
-
-scaricainv: 					# inverte il testo originale della frase
-
-	addi $sp,$sp,4
-	sb $t1,($t0) 				#carica l'indirizzo del primo byte di t1 in t0
-	addi $t0,$t0,1 				#somma ogni bayte di t0(t1) di per poi caricarli ed invertirli successivamente
-	lw $t1,0($sp)				#prende il valore proveniente dallo stack
-	bne $t1,$zero,scaricainv 		#controlla se il contore e' arrivato alla posozione finale
-
-	j exitinvertito
-
-invertialgoritmoE:
-salvaStackinv:
-
-	addi $sp,$sp,-16
-	sw $t0,0($sp)
-	sw $s0,4($sp)
-	sw $s1,8($sp)
-	move $s3,$s0 				#imposta a $s3 la lunghezza di buffer
-
-resetValoriinv:
-
-	li $t0,0
-	li $s0,0
-	li $s1,0
-	li $s3,0
-
-	la $s0, buffer
-
-
-salvaletterainv:				#ciclo grande, da cambiare di nome
-
-	lb $s1,($s0)				#salviamo in s1 la lettera
-	addi $s0,$s0,1
-	lb $t0,($s0)
-	bne $t0,'-',exitE
-	addi $s0,$s0,1
-
-	j leggesalvanumeroinv
-
-leggesalvanumeroinv:
-
-	lb $s2,($s0)				#salviamo in s2 il primo numero
-	addi $s2,$s2,-48
-
-	j controllonumeroinv
-
-controllonumeroinv:
-
-	addi $s0,$s0,1
-	lb $t0,($s0)
-	beq $t0,'-',convertepriminv
-	beq $t0,' ',convertesecinv
-	beq $t0,0,convertesecinv
-	addi $t0,$t0,-48
-	move $t2,$t0
-	mul $s2,$s2,10
-	add $s2,$s2,$t2
-
-
-	j controllonumeroinv
-
-uguaglia1:
-
-	move $s3, $s2
-
-	j f
-
-uguaglia2:
-
-	move $s3, $s2
-
-	j f2
-
-convertepriminv:
-
-	bge $s2, $s3, uguaglia1
-
-f:
-	                                     	#t1 uguale a s2
-	la $t1, bufferTemp 			#salviamo in t1 il buffer per poterci salvare la roba dentro
-	add $t1,$t1,$s2
-	sb $s1,($t1)
-	addi $s0,$s0,1
-
-	j leggesalvanumeroinv
-
-convertesecinv:
-
-	bge $s2, $s3, uguaglia2
-
-f2:
-
-	la $t1,bufferTemp 			#salviamo in t1 il buffer per poterci salvare la roba dentro
-	add $t1,$t1,$s2
-	sb $s1,($t1)
-	addi $s0,$s0,1
-
-	j salvaletterainv
-
-exitE:
-
-	li $t0, 0
-	la $t1,buffer 				#reset di t1 all'indirizzo del buffer temp
-	la $t2,bufferTemp
-
-cicloripristinainv:
-
-	addi $t0, $t0, 1
-	addi $t1, $t1, 1
-	addi $t2, $t2, 1
-	lb $t3,($t2)
-	sb $t3,($t1)
-	bgt $s3, $t0, cicloripristinainv	#copia solo fino la parte contenente effettivamente il testo
-
-pulibuffer:
-
-	li $t2, 0
-	addi $t0, $t0, 1
-	bge $t0,126, vaigiu		#quando il buffer e' finito esce
-	addi $t1, $t1, 1
-	sb $t2, ($t1)					#pulisce le posizioni da s3 alla fine del buffer
-
-	j pulibuffer
-
-vaigiu:
-
-	lw $t0, 0($sp)
 	lw $s0, 4($sp)
+	lw $ra, 0($sp)
+	addi $sp, $sp, 20	# Risistemazione dello stack pointer dopo aver estratto un dato
+jr $ra			# Termine della procedura
+
+algDecifraturaE:
+
+	addi $sp, $sp, -20	# Posizionamento dello stack pointer per poter fare un push
+	sw $ra, 0($sp) 		# Salvataggio di alcuni registri nello stack per poterli ripristinare a fine procedura
+	sw $s0, 4($sp)
+	sw $s1, 8($sp)
+	sw $s2, 12($sp)
+	sw $s3, 16($sp)
+
+	li $t1, 0	# Contatore del buffer della stringa
+  li $s1, 32	# Valore ASCII del simbolo " "
+	li $s2, 45	# Valore ASCII del simbolo "-"
+
+	# Copio bufferMessaggio to bufferMessaggioTemp
+	forCopiaBufferVersoTempDec:
+		lb $t0, bufferMessaggio($t1)		# Carattere da copiare
+		beq $t0, $zero, fineForCopiaBufferDec  	# condizione di uscita
+		sb $t0, bufferMessaggioTemp($t1)	# Effettuo la copia del carattere
+		sb $zero, bufferMessaggio($t1)		# Svuoto lo spazio su cui scrivero'
+		addi $t1, $t1, 1			# Incremento del contatore del buffer per passare ai valori successivi
+	j forCopiaBufferVersoTempDec	# Iterazione successiva
+
+	fineForCopiaBufferDec:
+		move $s0, $t1	# Mi salvo la lunghezza del buffer
+		li $t1, -1	# Resetto il contatore del buffer della stringa per usarlo su bufferMessaggioTemp
+		li $t2, 0	# Contatore di scrittura per bufferMessaggio
+
+	forStringaAlgDecE:	# Ciclo di tutti i caratteri della stringa
+		addi $t1, $t1, 1
+		bge $t1, $s0, fineForStringaAlgDecE 	# Controllo fine della stringa e del ciclo
+		lb $t0, bufferMessaggioTemp($t1)	# Carattere attuale da elaborare
+		beq $t0, $zero, fineForStringaAlgDecE   # Controllo fine della stringa e del ciclo
+
+		elaboraCarattere: # Il carattere da elaborare sta in $t0
+			li $t3, 0 # Contatore per svuotare lo spazio di memoria delle cifre
+			forSvuotoSpazioCifre:
+				lb $t4, bufferCifre($t3)		# Carico il carattere da controllare
+				beq $t4, $zero, trovaSuccessiveCifre	# Se ho cancellato tutte le cifre, proseguo
+				sb $zero, bufferCifre($t3)		# Cancello la cifra
+				addi $t3, $t3, 1
+			j forSvuotoSpazioCifre
+
+			trovaSuccessiveCifre:	# Cerco le successive cifre del carattere trovato
+				addi $t1, $t1, 1
+				li $t5, 0
+
+			forSuccessiveCifre:
+				addi $t1, $t1, 1
+				bgt $t1, $s0, fineDellaCifra 		# Controllo fine della stringa e del ciclo
+				lb $t4, bufferMessaggioTemp($t1)		# Carico il carattere da controllare
+
+				beq $t4, $s1, fineDellaCifra 			# Se il carattere e' uno spazio conclude una cifra (e tutte le cifre del carattere in corso)
+				beq $t4, $s2, fineDellaCifra			# Se il carattere e' un trattino conclude una cifra
+				beq $t4, $zero, fineDellaCifra			# Se il carattere e' un trattino conclude una cifra
+
+				# Se ricevo un numero
+				sb $t4, bufferCifre($t5)
+				addi $t5, $t5, 1
+				j forSuccessiveCifre
+
+				fineDellaCifra: # Se trattino o spazio
+				li $t3, 0
+				li $t8, 0
+				scorroLaCifra:
+					lb $t6, bufferCifre($t3)		# Carico il carattere da controllare
+					beq $t6, $zero, salvaCarattere	# Se ho letto tutte le cifre, proseguo
+					sb $zero, bufferCifre($t3)		# Cancello la cifra dal bufferCifre
+					addi $t3, $t3, 1
+
+					addi $t6, $t6, -48
+
+					li $t7, 1
+					li $t9, 1
+					piuDiDieci:
+						beq $t7, $t5, fineForPotenzaDieci
+						addi $t7, $t7, 1
+						mul $t9, $t9, 10
+					j piuDiDieci
+
+					fineForPotenzaDieci:
+					addi $t5, $t5, -1
+
+					mul $t6, $t6, $t9
+					add $t8, $t8, $t6
+
+				j scorroLaCifra
+
+				salvaCarattere:
+					sb $t0, bufferMessaggio($t8)
+
+					beq $t4, $s1, forStringaAlgDecE			# Se il carattere e' uno spazio conclude il carattere
+					beq $t4, $zero, fineForStringaAlgDecE		# Se il carattere e' la fine, conclude tutto
+				j forSuccessiveCifre
+
+				fineCifraTotale:
+					li $t5, 0
+
+		j forStringaAlgDecE	# Iterazione successiva
+
+	fineForStringaAlgDecE:
+	lw $s3, 16($sp)		# Ripristino di vari registri dallo stack
+	lw $s2, 12($sp)
 	lw $s1, 8($sp)
-	addi $sp, $sp, 12
+	lw $s0, 4($sp)
+	lw $ra, 0($sp)
+	addi $sp, $sp, 20	# Risistemazione dello stack pointer dopo aver estratto un dato
+jr $ra #fine procedura
 
-	addi $t0,$t0,-1
-	addi $s7, $s7, -1
 
-	j invertialgoritmi
-############################################################
-stampacriptato:
+# Procedura che calcola l'indice dell'ultimo elemento presente in uno spazio di memoria
+dimensioneBuffer:
+	li $v0, -1 #counter rows
+	forDimensioneBuffer:
+		lb $t0, 0($a0)
+		beq $t0, $zero, jrra 	# Se il carattere ha valore zero esce dal ciclo
+		addi $v0, $v0, 1
+		addi $a0, $a0, 1
+	j forDimensioneBuffer
 
-	li $v0, 13				# Open File Syscall
-	la $a0, filecifr			# Load File Name
-	li $a1, 1
-	li $a2, 0
+# Procedura "letturaFile" che viene utilizzata per leggere un file e salvarne il contenuto nel giusto spazio di memoria
+letturaFile:
+	addi $sp, $sp, -8
+	sw $s0, 0($sp)		# Salvataggio del precedente $s0 e $s1 nello stack per poterlo ripristinare a fine procedura
+	sw $s1, 4($sp)
+
+	# Apertura File
+	# Il nome del file viene gia' passato in $a0
+	move $s0, $a1		# Salvataggio del registro $a1, che viene passato alla procedura, prima che venga sostituito
+	li $v0, 13		# nome file chiave
+	li $a1, 0		# sola lettura
+	li $a2, 0		# (ignorato)
+	syscall
+	move $s1, $v0		# Salvataggio del descrittore del file
+	blt $v0, 0, errorReadFile	# In caso di errore di apertura nel file
+
+	# Lettura File
+	li $v0, 14		# Syscall per leggere in un file
+	move $a0, $s1		# Descrittore del file da cui leggere
+
+	beq $s0, 0, openMessageFile
+
+	openKeyFile:
+		la $a1, bufferKey	# Indirizzo del buffer in cui mettere i dati letti dal file
+		li $a2, 4		# Numero di caratteri da leggere
+		j openFile
+
+	openMessageFile:
+		la $a1, bufferMessaggio	# Indirizzo del buffer in cui mettere i dati letti dal file
+		li $a2, 128		# Numero di caratteri da leggere
+
+	openFile:
+		syscall
+
+	move $t1, $v0	# Numero di caratteri letti nel file
+
+	closeFile:	# Fine del file
+	# Chiusura file
+	li	$v0, 16		# Syscall per chiudere un file
+	move	$a0, $s1	# Descrittore del file da chiudere
 	syscall
 
-	move $t1, $v0				# Save File Descriptor
+	j fineLettura
 
-	li $v0, 15				# Write File Syscall
-	move $a0, $t1				#  = $a0, $t1    	# Load File Descriptor
-	la $a1, buffer				# Load Buffer Address
-	li $a2, 128				# Buffer Size
-	syscall
+	# In caso di errore di apertura del file
+	errorReadFile:
+		move $t0, $a0	# Salvataggio del nome del file da stampare
+		li $v0, 4			# Syscall per stampare
+		la $a0, erroreIO		# Stringa di errore da stampare
+		syscall
 
+	fineLettura:
+		lw $s1, 4($sp)		# Ripristino di $s0 e $s1 dallo stack
+		lw $s0, 0($sp)
+		addi $sp, $sp, 8	# Risistemazione dello stack pointer dopo aver estratto un dato
 
+jr $ra	# Termine della procedura
 
-	li $v0, 16				# Close File Syscall
-	move $a0, $t6				# Load File Descriptor
-	syscall
+scritturaFile:
+	# Il nome del file viene gia' passato in $a0
+	#OPEN
+		li	$v0, 13		# Open File Syscall
+		li	$a1, 1		# sola scrittura
+		li	$a2, 0		# (ignorato)
+		syscall
+		move	$t4, $v0	# Save File Descriptor
+		blt	$v0, 0, erroreWriteFile	# Goto Error
+	#WRITE
+		li	$v0, 15			# Write File Syscall
+		move	$a0, $t4		# Load File Descriptor
+		la	$a1, bufferMessaggio	# Load Buffer Address
+		li	$a2, 200000 		# Buffer Size
+		syscall
+	#CLOSE
+		li	$v0, 16		# Close File Syscall
+		move	$a0, $t4	# Load File Descriptor
+		syscall
+		jr $ra
 
-	li $v0, 16				# Close File Syscall
-	move $a0, $t1				# Load File Descriptor
-	syscall
+	# ErroreIO
+	erroreWriteFile:
+		li	$v0, 4		# Print String Syscall
+		la	$a0, erroreIO	# Load Error String
+		syscall
 
-	j preinverti
-
-stampadecriptato:
-
-	li $v0, 13				# Open File Syscall
-	la $a0, filedecifr			# Load File Name
-	li  $a1, 1
-	li  $a2, 0
-	syscall
-
-	move $t1, $v0				# Save File Descriptor
-
-	li $v0, 15				# Write File Syscall
-	move $a0, $t1			  	# Load File Descriptor
-	la $a1, buffer				# Load Buffer Address
-	li $a2, 128				# Buffer Size
-	syscall
-
-	li $v0, 16				# Close File Syscall
-	move $a0, $t6				# Load File Descriptor
-	syscall
-
-	li $v0, 16				# Close File Syscall
-	move $a0, $t1				# Load File Descriptor
-	syscall
-
-	j jrra
-############################################################
-salvaStack: #228
-
-	addi $sp,$sp,-40
-	sw $t0,0($sp)
-	sw $t1,4($sp)
-	sw $t2,8($sp)
-	sw $t3,12($sp)
-	sw $t4,16($sp)
-	sw $t5,20($sp)
-	sw $t6,24($sp)
-	sw $t7,28($sp)
-	sw $t8,32($sp)
-	#sw $ra,36($sp)
-	jr $ra
-
-ripristinaStack: #attenzione al nome
-	lw $t0,0($sp)
-	lw $t1,4($sp)
-	lw $t2,8($sp)
-	lw $t3,12($sp)
-	lw $t4,16($sp)
-	lw $t5,20($sp)
-	lw $t6,24($sp)
-	lw $t7,28($sp)
-	lw $t8,32($sp)
-	#lw $ra,36($sp)
-	addi $sp,$sp,40
-	jr $ra
-
-exit:
-
-	move $t0, $t7			#esce dall'algoritmo
-	addi $t0,$t0, 1
-	addi $s1, $s1, -1
-
-	j sceltaalgoritmo
-
-exitinvertito:
-
-	move $t0, $t7			#esce dall'algoritmo invertito
-	addi $t0, $t0, -1
-	addi $s7, $s7, -1
-
-	j invertialgoritmi
-
-errore:
-
-	li $v0, 4
-	la $a0, eroreio
-	syscall
-	j jrra
-
-	jr $ra
-	jrra:
+	jrra:			#Metodo ausiliario per utilizzare il jr $ra nei beq
 		jr $ra
