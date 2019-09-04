@@ -109,7 +109,7 @@ switch:################## modificato e compresso
 
 	SwitchAlgA:
 		mul $a0, $s2, 4	# Imposto se voglio cifrare o decifrare in base a quel che ho in $s2/////////////
-		jal algA	# Chiamo la procedura per cifrare o decifrare con algoritmo A/////////
+		jal algA	# Chiamo algoritmo A sia per cifrare che decifrare
 	j forStringaChiave	# Iterazione successiva
 
 	SwitchAlgB:
