@@ -198,6 +198,10 @@ algC:########################################################Capire e dividere
 
 # Procedura che cifra/decifra una stringa con l'Algoritmo D
 ######################################################################################
+	#	algD:
+		addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
+		sw $ra, 0($sp) 		# Salvataggio di $ra nello stack per poterlo ripristinare a fine procedura
+
 		la $t4, bufferMessaggio			 	#possiamo sovrascrivere t0
 
 		carica: 					#salva il testo nello stack
@@ -209,7 +213,7 @@ algC:########################################################Capire e dividere
 		addi $t4,$t4,1
 		bne $t1,$zero,carica 			# carica ogni byte del testo origionale nello stack
 
-		la $t4, buffer				#carica l'indirizzo del testo originale in t0
+		la $t4, bufferMessaggio				#carica l'indirizzo del testo originale in t0
 		addi $t4,$t4,-1
 
 		scarica: 					# inverte il testo originale della frase
@@ -221,10 +225,13 @@ algC:########################################################Capire e dividere
 
 		ble $t1,$t5,scarica 			#controlla se il contore e' arrivato alla posizione finale
 
+		lw $ra, 0($sp)		# Ripristino del vecchio $ra dallo stack
+		addi $sp, $sp, 4	# Risistemazione dello stack pointer dopo aver estratto un dato
+
 		jr $ra
 
 ######################################################################################
-#algD:##############################################################Da rifare
+algD:##############################################################Da rifare
 	addi $sp, $sp, -4	# Posizionamento dello stack pointer per poter fare un push
 	sw $ra, 0($sp) 		# Salvataggio di $ra nello stack per poterlo ripristinare a fine procedura
 
