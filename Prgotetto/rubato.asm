@@ -147,11 +147,6 @@ switch:################## modificato e compresso
 		addi $sp, $sp, 16	# Risistemazione dello stack pointer dopo aver estratto un dato
 jr $ra
 
-
-
-
-
-
 # ALGORITMI DI CIFRATURA/DECIFRATURA
 
 # Procedura che cifra/decifra una stringa con l'Algoritmo A in base al valore passato in $a0
@@ -268,7 +263,7 @@ algCifraturaE:
 	forStringaAlgCifE:	# Ciclo di tutti i caratteri della stringa
 		bge $t1, $s0, fineForStringaAlgCifE 	# Controllo fine della stringa e del ciclo
 		lb $t0, bufferMessageSupport($t1)	# Carattere attuale da elaborare
-		beq $t0, $zero, goAwayAlgE		# Se il carattere � gi� stato elaborato, vado al successivo
+		beq $t0, $zero, goAwayAlgE		# Se il carattere e' gia' stato elaborato, vado al successivo
 
 		beq $t2, 0, stampaCarattereAlgE
 		sb $s1, bufferMessage($t2)	# Scrivo lo spazio nella stringa finale
@@ -384,7 +379,7 @@ algDecifraturaE:
 		lb $t0, bufferMessage($t1)		# Carattere attuale da copiare
 		beq $t0, $zero, fineForCopiaBufferDec  	# Controllo fine della stringa e del ciclo
 		sb $t0, bufferMessageSupport($t1)	# Effettuo la copia del carattere
-		sb $zero, bufferMessage($t1)		# Svuoto lo spazio su cui scriver�
+		sb $zero, bufferMessage($t1)		# Svuoto lo spazio su cui scrivero'
 		addi $t1, $t1, 1			# Incremento del contatore del buffer per passare ai valori successivi
 	j forCopiaBufferToSupportDec	# Iterazione successiva
 
@@ -420,9 +415,9 @@ algDecifraturaE:
 				bgt $t1, $s0, fineDellaCifra 		# Controllo fine della stringa e del ciclo
 				lb $t4, bufferMessageSupport($t1)		# Carico il carattere da controllare
 
-				beq $t4, $s1, fineDellaCifra 			# Se il carattere � uno spazio conclude una cifra (e tutte le cifre del carattere in corso)
-				beq $t4, $s2, fineDellaCifra			# Se il carattere � un trattino conclude una cifra
-				beq $t4, $zero, fineDellaCifra			# Se il carattere � un trattino conclude una cifra
+				beq $t4, $s1, fineDellaCifra 			# Se il carattere e' uno spazio conclude una cifra (e tutte le cifre del carattere in corso)
+				beq $t4, $s2, fineDellaCifra			# Se il carattere e' un trattino conclude una cifra
+				beq $t4, $zero, fineDellaCifra			# Se il carattere e' un trattino conclude una cifra
 
 				# Se ricevo un numero
 				sb $t4, bufferCifre($t5)
@@ -460,8 +455,8 @@ algDecifraturaE:
 				scrivoIlCarattere:
 					sb $t0, bufferMessage($t8)
 
-					beq $t4, $s1, forStringaAlgDecE			# Se il carattere � uno spazio conclude il carattere
-					beq $t4, $zero, fineForStringaAlgDecE		# Se il carattere � la fine, conclude tutto
+					beq $t4, $s1, forStringaAlgDecE			# Se il carattere e' uno spazio conclude il carattere
+					beq $t4, $zero, fineForStringaAlgDecE		# Se il carattere e' la fine, conclude tutto
 				j forSuccessiveCifre
 
 				fineCifraTotale:
@@ -555,7 +550,7 @@ letturaFile:
 jr $ra	# Termine della procedura
 
 scritturaFile:
-	# Il nome del file viene gi� passato in $a0
+	# Il nome del file viene gia' passato in $a0
 	#OPEN FILE
 		li	$v0, 13		# Open File Syscall
 		li	$a1, 1		# Write-only Flag
