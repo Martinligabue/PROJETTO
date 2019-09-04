@@ -203,7 +203,7 @@ algC:########################################################Capire e dividere
 		carica: 					#salva il testo nello stack
 
 		lb $t1,($t4)
-		la $t5,$sp
+		la $t5,($sp)
 		addi $sp,$sp,-4 	 		# crea spazio per 1 words nello stack frame partendo dalla posizione -4
 		sw $t1,0($sp)
 		addi $t4,$t4,1
